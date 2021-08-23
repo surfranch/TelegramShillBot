@@ -1,0 +1,22 @@
+---
+
+api_id: <api_id>
+api_hash: <api_hash>
+app_short_name: <app_short_name>
+
+messages:
+  long: |
+    this is message 1
+    it can be whatever you want it to be
+  short: |
+    this is message 2
+    again, it can be whatever you want it to be
+    so you can have some variation
+
+raid:
+  <channel_name>:
+    message_type: long
+    wait_interval: 3
+  <some_other_channel_name>:
+    message_type: short
+    wait_interval: 300
