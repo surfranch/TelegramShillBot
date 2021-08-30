@@ -8,7 +8,7 @@ from telethon.errors.rpcerrorlist import FloodWaitError
 
 import yaml
 
-with open("settings.yml", "r") as settings:
+with open("settings.yml", "r", encoding="utf8") as settings:
     CONFIG = yaml.safe_load(settings)
 
 API_ID = CONFIG["api_id"]
