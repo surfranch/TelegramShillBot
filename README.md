@@ -13,6 +13,8 @@ Our goal is simple: to earn enough money to build a [surf ranch](https://www.flo
 
 This project is free to everyone (except those wankers), and expect more kick ass projects soon!
 
+You can ask us questions in: https://t.me/surfranch1
+
 ## <span style="color:red">WARNING</span> ##
 This can cause your account to be rate limited and even banned if you shill too often. A safe `wait_interval` is typically around 900 seconds.
 
