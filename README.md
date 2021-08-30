@@ -71,6 +71,9 @@ This can cause your account to be rate limited and even banned if you shill too 
     ...
   ```
 
+- Verify your YAML by copying all of `settings.yml` and paste it into http://www.yamllint.com/
+  - Fix any reported errors
+
 - Sign into the Telegram channels you plan to shill, using the account you plan to shill with
   - This should fix any `CAPTCHA` guards that may be in place
 
