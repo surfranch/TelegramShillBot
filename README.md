@@ -135,3 +135,8 @@ You will be prompted to enter your phone (or bot token) and the Telegram code yo
 - Add unit tests
 - UI maybe if we want to get fancy with this
   - Or use existing tg clients with something like pyautogui
+
+##### Keywords
+bot
+shill, shillbot, shill bot
+telegram, telegram shill, telegram shillbot, telegram shill bot
