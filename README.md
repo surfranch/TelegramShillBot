@@ -7,7 +7,7 @@ There are a couple of runtime options available (one easy, one hard), so please 
 
 ## Speaking Of Shilling
 If you find this bot useful, please consider donating any token of value to our BSC wallet:
-`0xE75470B9a7c93038195ca116E342c42F6B3F758b`. Just as an example, some paid shill bots cost **~$500.00**, with few additional features.
+`0xb973B103c83E467f27D04e9F31F70aaf1A83d595`. Just as an example, some paid shill bots cost **~$500.00**, with few additional features.
 
 Our goal is simple: to earn enough money to build a [surf ranch](https://www.flowrider.com/product/flowbarrel-ten/) business.
 
