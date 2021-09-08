@@ -26,9 +26,13 @@ def log(message):
 
 async def send_message(channel):
     log(f"Sending message to {channel}")
-    message = MESSAGES_CONFIG[RAID_CONFIG[channel]["message_type"]]
-    entity = await CLIENT.get_entity(channel)
-    await CLIENT.send_message(entity, message)
+    try:
+        message = MESSAGES_CONFIG[RAID_CONFIG[channel]["message_type"]]
+        entity = await CLIENT.get_entity(channel)
+        await CLIENT.send_message(entity, message)
+    except FloodWaitError as fwe:
+        log(f"FloodWaitError invoked; Forced waiting for {fwe}")
+        await asyncio.sleep(delay=fwe.seconds)
 
 
 async def raid(channel):
