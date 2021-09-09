@@ -16,7 +16,11 @@ messages:
 raid:
   <channel_name>:
     message_type: long
+    # this is in seconds, so the below example is equal to 3 seconds
+    # we recommend at least 900 seconds, which is equal to 15 minutes
     wait_interval: 3
   <some_other_channel_name>:
     message_type: short
+    # this is in seconds, so the below example is equal to 5 minutes
+    # we recommend at least 900 seconds, which is equal to 15 minutes
     wait_interval: 300

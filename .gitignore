@@ -140,3 +140,4 @@ cython_debug/
 settings.yml
 .DS_Store
 *.session
+*.session-journal
