@@ -84,6 +84,9 @@ This can cause your account to be rate limited and even banned if you shill too 
     ```
 
 - Fill out the `settings.yml` with the channel(s) you want to shill, and how you want to shill them (i.e. what message you would like to send)
+  - Please make sure you are using the official Telegram channel name and not what is shown in the channel title
+    - e.g. The official Telegram channel name for `https://t.me/surfranch1` is `surfranch1`, even though the channel title is `SurfRanch`
+    - This can be obtained by viewing the channel info
   - **BEFORE**
     ```yaml
     ...
