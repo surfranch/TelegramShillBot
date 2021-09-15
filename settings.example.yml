@@ -15,12 +15,12 @@ messages:
 
 raid:
   CHANNEL_NAME:
-    message_type: long
+    message_type: one
     # this is in seconds, so the below example is equal to 3 seconds
     # we recommend at least 900 seconds, which is equal to 15 minutes
     wait_interval: 3
   SOME_OTHER_CHANNEL_NAME:
-    message_type: short
+    message_type: two
     # this is in seconds, so the below example is equal to 5 minutes
     # we recommend at least 900 seconds, which is equal to 15 minutes
     wait_interval: 300

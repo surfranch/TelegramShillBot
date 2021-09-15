@@ -61,6 +61,7 @@ This can cause your account to be rate limited and even banned if you shill too 
 - Fill out the `settings.yml` with the message(s) you want to shill
   - **BEFORE**
     ```yaml
+    ...
     messages:
       one: |
         this is message 1
@@ -69,6 +70,7 @@ This can cause your account to be rate limited and even banned if you shill too 
         this is message 2
         again, it can be whatever you want it to be
         so you can have some variation
+    ...
     ```
   - **AFTER**
     ```yaml
@@ -82,18 +84,30 @@ This can cause your account to be rate limited and even banned if you shill too 
     ```
 
 - Fill out the `settings.yml` with the channel(s) you want to shill, and how you want to shill them (i.e. what message you would like to send)
-  ```yaml
-  raid:
-    cryptoblank:
-      message_type: one
-      # ^^ this maps to a message "name" you created earlier
-      wait_interval: 1800
-      # ^^ this is in seconds
-    tsamoon:
-      message_type: two
-      wait_interval: 900
+  - **BEFORE**
+    ```yaml
     ...
-  ```
+    raid:
+      CHANNEL_NAME:
+        message_type: one
+        wait_interval: 3
+      SOME_OTHER_CHANNEL_NAME:
+        message_type: two
+        wait_interval: 300
+    ```
+  - **AFTER**
+    ```yaml
+    ...
+    raid:
+      cryptoblank:
+        message_type: one
+        # ^^ this maps to a message "name" you created earlier
+        wait_interval: 1800
+        # ^^ this is in seconds
+      tsamoon:
+        message_type: two
+        wait_interval: 900
+    ```
 
 - Verify your YAML by copying all of `settings.yml` and paste it into http://www.yamllint.com/
   - Fix any reported errors
