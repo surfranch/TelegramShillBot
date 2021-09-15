@@ -1,25 +1,25 @@
 ---
 
-api_id: <api_id>
-api_hash: <api_hash>
-app_short_name: <app_short_name>
+api_id: API_ID
+api_hash: API_HASH
+app_short_name: APP_SHORT_NAME
 
 messages:
-  long: |
+  one: |
     this is message 1
     it can be whatever you want it to be
-  short: |
+  two: |
     this is message 2
     again, it can be whatever you want it to be
     so you can have some variation
 
 raid:
-  <channel_name>:
+  CHANNEL_NAME:
     message_type: long
     # this is in seconds, so the below example is equal to 3 seconds
     # we recommend at least 900 seconds, which is equal to 15 minutes
     wait_interval: 3
-  <some_other_channel_name>:
+  SOME_OTHER_CHANNEL_NAME:
     message_type: short
     # this is in seconds, so the below example is equal to 5 minutes
     # we recommend at least 900 seconds, which is equal to 15 minutes
