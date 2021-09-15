@@ -39,39 +39,75 @@ This can cause your account to be rate limited and even banned if you shill too 
 - Create a copy of `settings.example.yml` and name it `settings.yml`
 
 - Fill out the `settings.yml` with your app configuration details
-  ```yaml
-  ---
+  - **BEFORE**
+    ```yaml
+    ---
 
-  api_id: 123456
-  api_hash: abc123xyz456
-  app_short_name: MyAwesomeShillBot
-  ...
-  ```
+    api_id: API_ID
+    api_hash: API_HASH
+    app_short_name: APP_SHORT_NAME
+    ...
+    ```
+  - **AFTER**
+    ```yaml
+    ---
+
+    api_id: 123456
+    api_hash: abc123xyz456
+    app_short_name: MyAwesomeShillBot
+    ...
+    ```
 
 - Fill out the `settings.yml` with the message(s) you want to shill
-  ```yaml
-  ...
-  messsages:
-    one: |
-      i can be whatever i want it to be
-    two: |
-      and so can i
-  ...
-  ```
+  - **BEFORE**
+    ```yaml
+    ...
+    messages:
+      one: |
+        this is message 1
+        it can be whatever you want it to be
+      two: |
+        this is message 2
+        again, it can be whatever you want it to be
+        so you can have some variation
+    ...
+    ```
+  - **AFTER**
+    ```yaml
+    ...
+    messsages:
+      one: |
+        i will be whatever you define me to be
+      two: |
+        and so will i
+    ...
+    ```
 
 - Fill out the `settings.yml` with the channel(s) you want to shill, and how you want to shill them (i.e. what message you would like to send)
-  ```yaml
-  raid:
-    cryptoblank:
-      message_type: one
-      # ^^ this maps to a message "name" you created earlier
-      wait_interval: 1800
-      # ^^ this is in seconds
-    tsamoon:
-      message_type: two
-      wait_interval: 900
+  - **BEFORE**
+    ```yaml
     ...
-  ```
+    raid:
+      CHANNEL_NAME:
+        message_type: one
+        wait_interval: 3
+      SOME_OTHER_CHANNEL_NAME:
+        message_type: two
+        wait_interval: 300
+    ```
+  - **AFTER**
+    ```yaml
+    ...
+    raid:
+      cryptoblank:
+        message_type: one
+        # ^^ this maps to a message "name" you created earlier
+        wait_interval: 1800
+        # ^^ this is in seconds
+      tsamoon:
+        message_type: two
+        wait_interval: 900
+    ```
 
 - Verify your YAML by copying all of `settings.yml` and paste it into http://www.yamllint.com/
   - Fix any reported errors
