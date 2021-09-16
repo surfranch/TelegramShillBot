@@ -24,6 +24,7 @@ This can cause your account to be rate limited and even banned if you shill too 
   + [Easy](#easy)
   + [Not As Easy](#not-as-easy)
   + [Telegram Prompt](#telegram-prompt)
+* [Stopping](#stopping)
 * [Tested With](#tested-with)
 * [Contribute](#contribute)
 * [ToDo](#todo)
@@ -145,6 +146,9 @@ This can cause your account to be rate limited and even banned if you shill too 
 You will be prompted to enter your phone (or bot token) and the Telegram code you received - please fill it out.
 ![telegram shill bot startup](./docs/startup.png)
 ![telegram login code](./docs/logincode.png)
+
+## Stopping
+- Whether running in Docker or locally, `Ctrl+C` should stop the process
 
 ## Tested With
 - `macOS Catalina v10.15.7`
