@@ -39,6 +39,8 @@ This can cause your account to be rate limited and even banned if you shill too 
 
 - Create a copy of `settings.example.yml` and name it `settings.yml`
 
+- If this is your 1st time editing a YAML file, we strongly recommend taking 15 minutes to learn about it here: https://gettaurus.org/docs/YAMLTutorial/
+
 - Fill out the `settings.yml` with your app configuration details
   - **BEFORE**
     ```yaml
