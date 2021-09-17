@@ -13,7 +13,7 @@ Our goal is simple: to earn enough money to build a [surf ranch](https://www.flo
 
 This project is free to everyone (except those wankers), and expect more kick ass projects soon!
 
-You can ask us questions in: https://t.me/surfranch1
+You can ask us questions via Telegram: https://t.me/joinchat/Sp3ACd_CTKA0MWIx
 
 ## <span style="color:red">WARNING</span> ##
 This can cause your account to be rate limited and even banned if you shill too often. A safe `wait_interval` is typically around 900 seconds.
@@ -88,9 +88,9 @@ This can cause your account to be rate limited and even banned if you shill too 
 
 - Fill out the `settings.yml` with the channel(s) you want to shill, and how you want to shill them (i.e. what message you would like to send)
   - Please make sure you are using the official Telegram channel name and not what is shown in the channel title
-    - e.g. The official Telegram channel name for `https://t.me/surfranch1` is `surfranch1`, even though the channel title is `SurfRanch`
+    - e.g. The official Telegram channel name for `https://t.me/TelegramTips` is `TelegramTips`, even though the channel title is `Telegram Tips`
     - This can be obtained by viewing the channel info
-  - **BEFORE**
+  - **BEFORE**f
     ```yaml
     ...
     raid:
