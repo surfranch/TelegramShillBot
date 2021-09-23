@@ -1,3 +1,4 @@
+import random
 import sys
 import time
 import asyncio
@@ -24,12 +25,31 @@ def log(message):
     print("[" + now.strftime("%H:%M:%S.%f")[:-3] + "] " + message)
 
 
+def random_thank_you():
+    thank_yous = [
+        "Thank you",
+        "Tak",
+        "Dank u",
+        "Kiitos",
+        "Merci",
+        "Danke",
+        "Mahalo",
+        "Grazie",
+        "Arigato",
+        "Obrigado",
+        "Gracias",
+        "Xie xie"
+    ]
+    return thank_yous[random.randrange(len(thank_yous))]
+
+
 async def send_message(channel):
     log(f"Sending message to {channel}")
     try:
         message = MESSAGES_CONFIG[RAID_CONFIG[channel]["message_type"]]
+        new_message = message + "\n" + random_thank_you() + "!"
         entity = await CLIENT.get_entity(channel)
-        await CLIENT.send_message(entity, message)
+        await CLIENT.send_message(entity, new_message)
     except FloodWaitError as fwe:
         log(f"FloodWaitError invoked; Forced waiting for {fwe}")
         await asyncio.sleep(delay=fwe.seconds)

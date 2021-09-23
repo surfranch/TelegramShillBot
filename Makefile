@@ -11,7 +11,7 @@ help:
 
 clean:
 	@deactivate > /dev/null 2>&1 || echo "skipping deactivate"
-	@rm -fr venv
+	@rm -fr venv *.session
 
 setup:
 	@python3 -m venv venv
