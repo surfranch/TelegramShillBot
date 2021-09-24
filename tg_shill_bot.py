@@ -1,9 +1,10 @@
+import asyncio
 import random
 import sys
 import time
-import asyncio
-
 from datetime import datetime
+
+import asyncstdlib
 from telethon import TelegramClient, functions
 from telethon.errors.rpcerrorlist import FloodWaitError
 
@@ -38,9 +39,14 @@ def random_thank_you():
         "Arigato",
         "Obrigado",
         "Gracias",
-        "Xie xie"
+        "Xie xie",
     ]
     return thank_yous[random.randrange(len(thank_yous))]
+
+
+@asyncstdlib.lru_cache()
+async def get_entity(channel):
+    return await CLIENT.get_entity(channel)
 
 
 async def send_message(channel):
@@ -48,7 +54,7 @@ async def send_message(channel):
     try:
         message = MESSAGES_CONFIG[RAID_CONFIG[channel]["message_type"]]
         new_message = message + "\n" + random_thank_you() + "!"
-        entity = await CLIENT.get_entity(channel)
+        entity = await get_entity(channel)
         await CLIENT.send_message(entity, new_message)
     except FloodWaitError as fwe:
         log(f"FloodWaitError invoked; Forced waiting for {fwe}")
