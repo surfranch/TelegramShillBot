@@ -61,11 +61,7 @@ def recommended_splay():
     total_segment_time = segments * segment_time
     default_splay = math.ceil(segment_time / max_channels_per_segment)
     calculated_splay = math.ceil(total_segment_time / channels)
-    return (
-        default_splay
-        if calculated_splay > default_splay
-        else math.ceil(total_segment_time / channels)
-    )
+    return default_splay if calculated_splay > default_splay else calculated_splay
 
 
 def splay_map():
@@ -145,7 +141,8 @@ if __name__ == "__main__":
     try:
         log(f"Calculated splay: {recommended_splay()} seconds")
         log(
-            "Splay will be added to connection and user defined wait intervals to avoid Telegram rate limiting"
+            "Splay will be added to connection and user defined wait intervals"
+            + " to avoid Telegram rate limiting"
         )
         do_connect()
         do_raid()
