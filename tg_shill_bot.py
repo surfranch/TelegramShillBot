@@ -1,4 +1,5 @@
 import asyncio
+import math
 import random
 import sys
 import time
@@ -40,8 +41,36 @@ def random_thank_you():
         "Obrigado",
         "Gracias",
         "Xie xie",
+        "Shukran",
+        "Hvala",
+        "Efharisto",
+        "Dhanyavaad",
+        "Spasiba",
+        "Salamat",
+        "Khob khun",
     ]
     return thank_yous[random.randrange(len(thank_yous))]
+
+
+def recommended_splay():
+    # all of this assumes TG rate limit is 20 API calls per 1 minute
+    segment_time = 72  # 120% of 60 seconds
+    max_channels_per_segment = 20  # max calls per segment
+    channels = len(RAID_CONFIG.keys())
+    segments = math.ceil(channels / max_channels_per_segment)
+    total_segment_time = segments * segment_time
+    default_splay = math.ceil(segment_time / max_channels_per_segment)
+    calculated_splay = math.ceil(total_segment_time / channels)
+    return default_splay if calculated_splay > default_splay else calculated_splay
+
+
+def splay_map():
+    count = 1
+    result = {}
+    for channel in RAID_CONFIG.keys():
+        result[channel] = count * recommended_splay()
+        count += 1
+    return result
 
 
 @asyncstdlib.lru_cache()
@@ -61,20 +90,24 @@ async def send_message(channel):
         await asyncio.sleep(delay=fwe.seconds)
 
 
-async def raid(channel):
+async def raid(channel, splay):
     if "wait_interval" not in RAID_CONFIG[channel]:
         log(f"Raiding {channel} once")
+        await asyncio.sleep(splay)
         await send_message(channel)
     else:
-        log(f"Raiding {channel} every {RAID_CONFIG[channel]['wait_interval']} seconds")
+        wait_interval = RAID_CONFIG[channel]["wait_interval"] + splay
+        log(f"Raiding {channel} every {wait_interval} seconds")
+        await asyncio.sleep(splay)
         while True:
             await send_message(channel)
-            await asyncio.sleep(RAID_CONFIG[channel]["wait_interval"])
+            await asyncio.sleep(wait_interval)
 
 
-async def connect(channel):
-    log(f"Connecting to {channel}")
+async def connect(channel, splay):
     try:
+        await asyncio.sleep(splay)
+        log(f"Connecting to {channel}")
         await CLIENT(functions.channels.JoinChannelRequest(channel=channel))
     except FloodWaitError as fwe:
         print(f"Waiting for {fwe}")
@@ -84,16 +117,18 @@ async def connect(channel):
 def do_connect():
     loop = asyncio.get_event_loop()
     tasks = []
+    channel_splay = splay_map()
     for channel in RAID_CONFIG.keys():
-        tasks.append(loop.create_task(connect(channel)))
+        tasks.append(loop.create_task(connect(channel, channel_splay[channel])))
     loop.run_until_complete(asyncio.wait(tasks))
 
 
 def do_raid():
     loop = asyncio.get_event_loop()
     tasks = []
+    channel_splay = splay_map()
     for channel in RAID_CONFIG.keys():
-        tasks.append(loop.create_task(raid(channel)))
+        tasks.append(loop.create_task(raid(channel, channel_splay[channel])))
     loop.run_until_complete(asyncio.wait(tasks))
     loop.close()
 
@@ -104,6 +139,11 @@ if __name__ == "__main__":
     time.sleep(10)
 
     try:
+        log(f"Calculated splay: {recommended_splay()} seconds")
+        log(
+            "Splay will be added to connection and user defined wait intervals"
+            + " to avoid Telegram rate limiting"
+        )
         do_connect()
         do_raid()
     except KeyboardInterrupt:
