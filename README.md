@@ -146,6 +146,7 @@ This can cause your account to be rate limited and even banned if you shill too 
 
 ### Telegram Prompt
 You will be prompted to enter your phone (or bot token) and the Telegram code you received - please fill it out.
+- **NOTE:** We have not heard of anyone successfully using a bot token; you will most likely have to use your phone
 ![telegram shill bot startup](./docs/startup.png)
 ![telegram login code](./docs/logincode.png)
 
