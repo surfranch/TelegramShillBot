@@ -1,4 +1,5 @@
 import asyncio
+import functools
 import math
 import random
 import sys
@@ -51,6 +52,7 @@ def random_thank_you():
     return thank_yous[random.randrange(len(thank_yous))]
 
 
+@functools.lru_cache()
 def recommended_splay():
     # all of this assumes TG rate limit is 20 API calls per 1 minute
     segment_time = 72  # 120% of 60 seconds
@@ -63,6 +65,7 @@ def recommended_splay():
     return default_splay if calculated_splay > default_splay else calculated_splay
 
 
+@functools.lru_cache()
 def splay_map():
     count = 1
     result = {}
@@ -70,6 +73,12 @@ def splay_map():
         result[channel] = count * recommended_splay()
         count += 1
     return result
+
+
+@functools.lru_cache()
+def splay(channel):
+    channel_splay = splay_map()
+    return channel_splay[channel]
 
 
 @asyncstdlib.lru_cache()
@@ -92,23 +101,23 @@ async def send_message(channel):
         await asyncio.sleep(delay=swe.seconds)
 
 
-async def raid(channel, splay):
+async def raid(channel):
     if "wait_interval" not in RAID_CONFIG[channel]:
         log(f"Raiding {channel} once")
-        await asyncio.sleep(splay)
+        await asyncio.sleep(splay(channel))
         await send_message(channel)
     else:
-        wait_interval = RAID_CONFIG[channel]["wait_interval"] + splay
+        wait_interval = RAID_CONFIG[channel]["wait_interval"] + splay(channel)
         log(f"Raiding {channel} every {wait_interval} seconds")
-        await asyncio.sleep(splay)
+        await asyncio.sleep(splay(channel))
         while True:
             await send_message(channel)
             await asyncio.sleep(wait_interval)
 
 
-async def connect(channel, splay):
+async def connect(channel):
     try:
-        await asyncio.sleep(splay)
+        await asyncio.sleep(splay(channel))
         log(f"Connecting to {channel}")
         await CLIENT(functions.channels.JoinChannelRequest(channel=channel))
     except FloodWaitError as fwe:
@@ -117,14 +126,12 @@ async def connect(channel, splay):
 
 
 async def do_raid():
-    channel_splay = splay_map()
-    tasks = [raid(channel, channel_splay[channel]) for channel in RAID_CONFIG.keys()]
+    tasks = [raid(channel) for channel in RAID_CONFIG.keys()]
     await asyncio.gather(*tasks)
 
 
 async def do_connect():
-    channel_splay = splay_map()
-    tasks = [connect(channel, channel_splay[channel]) for channel in RAID_CONFIG.keys()]
+    tasks = [connect(channel) for channel in RAID_CONFIG.keys()]
     await asyncio.gather(*tasks)
 
 
