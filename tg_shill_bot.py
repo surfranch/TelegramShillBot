@@ -7,7 +7,7 @@ from datetime import datetime
 
 import asyncstdlib
 from telethon import TelegramClient, functions
-from telethon.errors.rpcerrorlist import FloodWaitError
+from telethon.errors.rpcerrorlist import FloodWaitError, SlowModeWaitError
 
 import yaml
 
@@ -96,6 +96,9 @@ async def send_message(channel):
     except FloodWaitError as fwe:
         log(f"FloodWaitError invoked; Forced waiting for {fwe}")
         await asyncio.sleep(delay=fwe.seconds)
+    except SlowModeWaitError as swe:
+        log(f"SlowModeWaitError invoked; Forced waiting for {swe}")
+        await asyncio.sleep(delay=swe.seconds)
 
 
 async def raid(channel):
