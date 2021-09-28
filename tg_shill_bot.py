@@ -2,7 +2,6 @@ import asyncio
 import math
 import random
 import sys
-import time
 from datetime import datetime
 
 import asyncstdlib
@@ -114,37 +113,41 @@ async def connect(channel, splay):
         await asyncio.sleep(delay=fwe.seconds)
 
 
-def do_connect():
-    loop = asyncio.get_event_loop()
-    tasks = []
+async def do_raid():
     channel_splay = splay_map()
-    for channel in RAID_CONFIG.keys():
-        tasks.append(loop.create_task(connect(channel, channel_splay[channel])))
-    loop.run_until_complete(asyncio.wait(tasks))
+    tasks = [raid(channel, channel_splay[channel]) for channel in RAID_CONFIG.keys()]
+    await asyncio.gather(*tasks)
 
 
-def do_raid():
-    loop = asyncio.get_event_loop()
-    tasks = []
+async def do_connect():
     channel_splay = splay_map()
-    for channel in RAID_CONFIG.keys():
-        tasks.append(loop.create_task(raid(channel, channel_splay[channel])))
-    loop.run_until_complete(asyncio.wait(tasks))
-    loop.close()
+    tasks = [connect(channel, channel_splay[channel]) for channel in RAID_CONFIG.keys()]
+    await asyncio.gather(*tasks)
+
+
+async def close():
+    await CLIENT.log_out()
+
+
+async def start():
+    await CLIENT.start()
+    await asyncio.sleep(10)
+
+    log(f"Calculated splay: {recommended_splay()} seconds")
+    log(
+        "Splay will be added to connection and user defined wait intervals"
+        + " to avoid Telegram rate limiting"
+    )
+    await do_connect()
+    await do_raid()
 
 
 if __name__ == "__main__":
     CLIENT = TelegramClient(APP_SHORT_NAME, API_ID, API_HASH)
-    CLIENT.start()
-    time.sleep(10)
-
+    LOOP = asyncio.get_event_loop()
     try:
-        log(f"Calculated splay: {recommended_splay()} seconds")
-        log(
-            "Splay will be added to connection and user defined wait intervals"
-            + " to avoid Telegram rate limiting"
-        )
-        do_connect()
-        do_raid()
+        LOOP.run_until_complete(start())
+        LOOP.run_until_complete(close())
     except KeyboardInterrupt:
+        LOOP.run_until_complete(close())
         sys.exit(0)
