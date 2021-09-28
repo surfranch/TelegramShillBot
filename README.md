@@ -83,6 +83,9 @@ This can cause your account to be rate limited and even banned if you shill too 
         i will be whatever you define me to be
       two: |
         and so will i
+      three: |
+        i am yet another message
+      # ^^ you can add as many messages as you want as long as the prescribed format is followed
     ...
     ```
 
@@ -90,7 +93,7 @@ This can cause your account to be rate limited and even banned if you shill too 
   - Please make sure you are using the official Telegram channel name and not what is shown in the channel title
     - e.g. The official Telegram channel name for `https://t.me/TelegramTips` is `TelegramTips`, even though the channel title is `Telegram Tips`
     - This can be obtained by viewing the channel info
-  - **BEFORE**f
+  - **BEFORE**
     ```yaml
     ...
     raid:
@@ -113,6 +116,10 @@ This can cause your account to be rate limited and even banned if you shill too 
       tsamoon:
         message_type: two
         wait_interval: 900
+      shiltestchannel01:
+        message_type: three
+        wait_interval: 60
+      # ^^ you can add as many channels as you want as long as the prescribed format is followed
     ```
 
 - Verify your YAML by copying all of `settings.yml` and paste it into http://www.yamllint.com/
