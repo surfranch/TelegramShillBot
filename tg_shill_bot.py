@@ -90,6 +90,15 @@ async def get_entity(channel):
     return await CLIENT.get_entity(channel)
 
 
+def channel_map(channel):
+    return {
+        "name": channel,
+        "splay": splay(channel),
+        "wait_interval": RAID_CONFIG[channel].get("wait_interval", None),
+        "message": MESSAGES_CONFIG[RAID_CONFIG[channel]["message_type"]],
+    }
+
+
 async def send_message(channel):
     log(f"Sending message to {channel}")
     try:
@@ -132,13 +141,18 @@ async def raid(channel):
 
 
 async def connect(channel):
+    channels = []
     try:
-        await asyncio.sleep(splay(channel))
-        log(f"Connecting to {channel}")
-        await CLIENT(functions.channels.JoinChannelRequest(channel=channel))
-    except FloodWaitError as fwe:
-        print(f"Waiting for {fwe}")
-        await asyncio.sleep(delay=fwe.seconds)
+        await asyncio.sleep(channel["splay"])
+        log(f"Connecting to {channel['name']}")
+        await CLIENT(functions.channels.JoinChannelRequest(channel=channel["name"]))
+        channels.append(channel)
+    except Exception as e:
+        message = f"An exception was raised when connecting to {channel['name']}"
+        if hasattr(e, "message"):
+            message = message + "\n{e.message}"
+        log(message)
+    return channels
 
 
 async def do_raid():
@@ -147,7 +161,7 @@ async def do_raid():
 
 
 async def do_connect():
-    tasks = [connect(channel) for channel in RAID_CONFIG.keys()]
+    tasks = [connect(channel_map(channel)) for channel in RAID_CONFIG.keys()]
     await asyncio.gather(*tasks)
 
 
