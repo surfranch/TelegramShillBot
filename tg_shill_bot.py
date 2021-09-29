@@ -30,11 +30,15 @@ def log(message):
 def random_thank_you():
     thank_yous = [
         "Thank you",
+        "Thanks",
         "Tak",
         "Dank u",
         "Kiitos",
         "Merci",
+        "Merci beaucoup",
         "Danke",
+        "Danke schön",
+        "Danke vielmals",
         "Mahalo",
         "Grazie",
         "Arigato",
@@ -101,18 +105,30 @@ async def send_message(channel):
         await asyncio.sleep(delay=swe.seconds)
 
 
-async def raid(channel):
-    if "wait_interval" not in RAID_CONFIG[channel]:
-        log(f"Raiding {channel} once")
-        await asyncio.sleep(splay(channel))
+async def send_single_message(channel):
+    log(f"Raiding {channel} once")
+    await send_message(channel)
+
+
+async def send_looped_message(channel):
+    wait_interval = RAID_CONFIG[channel]["wait_interval"] + splay(channel)
+    log(f"Raiding {channel} every {wait_interval} seconds")
+    while True:
         await send_message(channel)
+        await asyncio.sleep(wait_interval)
+
+
+def message_once(channel):
+    return "wait_interval" not in RAID_CONFIG[channel]
+
+
+async def raid(channel):
+    await asyncio.sleep(splay(channel))
+
+    if message_once(channel):
+        await send_single_message(channel)
     else:
-        wait_interval = RAID_CONFIG[channel]["wait_interval"] + splay(channel)
-        log(f"Raiding {channel} every {wait_interval} seconds")
-        await asyncio.sleep(splay(channel))
-        while True:
-            await send_message(channel)
-            await asyncio.sleep(wait_interval)
+        await send_looped_message(channel)
 
 
 async def connect(channel):
