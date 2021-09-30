@@ -96,7 +96,13 @@ def channel_map(channel):
         "splay": splay(channel),
         "wait_interval": RAID_CONFIG[channel].get("wait_interval", None),
         "message": MESSAGES_CONFIG[RAID_CONFIG[channel]["message_type"]],
+        "count": 0,
     }
+
+
+def increment_count(channel):
+    channel["count"] += 1
+    return channel
 
 
 async def send_message(channel):
@@ -107,11 +113,11 @@ async def send_message(channel):
         await CLIENT.send_message(entity, new_message)
     except FloodWaitError as fwe:
         log(f"FloodWaitError invoked; Forced waiting for {fwe}")
-        await asyncio.sleep(delay=fwe.seconds)
+        await asyncio.sleep(fwe.seconds)
     except SlowModeWaitError as swe:
         log(f"SlowModeWaitError invoked; Forced waiting for {swe}")
-        await asyncio.sleep(delay=swe.seconds)
-    return channel
+        await asyncio.sleep(swe.seconds)
+    return increment_count(channel)
 
 
 async def send_single_message(channel):
@@ -119,17 +125,25 @@ async def send_single_message(channel):
     await send_message(channel)
 
 
+def calculate_wait_interval(channel):
+    calculated_wait_interval = channel["wait_interval"] + channel["splay"]
+    channel.update({"calculated_wait_interval": calculated_wait_interval})
+    return channel
+
+
 async def send_looped_message(channel):
-    new_wait_interval = channel["wait_interval"] + channel["splay"]
-    channel.update({"new_wait_interval": new_wait_interval})
-    log(f"Raiding {channel['name']} every {new_wait_interval} seconds")
-    while True:
+    channel = calculate_wait_interval(channel)
+    channel.update({"loop": True})
+    log(
+        f"Raiding {channel['name']} every {channel['calculated_wait_interval']} seconds"
+    )
+    while channel["loop"]:
         channel = await send_message(channel)
-        await asyncio.sleep(channel["new_wait_interval"])
+        await asyncio.sleep(channel["calculated_wait_interval"])
 
 
 def message_once(channel):
-    return True if not channel["wait_interval"] else False
+    return not bool(channel["wait_interval"])
 
 
 async def raid(channel):
