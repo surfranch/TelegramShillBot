@@ -90,40 +90,65 @@ async def get_entity(channel):
     return await CLIENT.get_entity(channel)
 
 
+def channel_map(channel):
+    return {
+        "name": channel,
+        "splay": splay(channel),
+        "wait_interval": RAID_CONFIG[channel].get("wait_interval", None),
+        "message": MESSAGES_CONFIG[RAID_CONFIG[channel]["message_type"]],
+        "count": 0,
+    }
+
+
+def increment_count(channel):
+    channel["count"] += 1
+    return channel
+
+
 async def send_message(channel):
-    log(f"Sending message to {channel}")
+    channel = increment_count(channel)
+    log(f"Sending message to {channel['name']} (#{channel['count']})")
     try:
-        message = MESSAGES_CONFIG[RAID_CONFIG[channel]["message_type"]]
-        new_message = message + "\n" + random_thank_you() + "!"
-        entity = await get_entity(channel)
+        new_message = channel["message"] + "\n" + random_thank_you() + "!"
+        entity = await get_entity(channel["name"])
         await CLIENT.send_message(entity, new_message)
     except FloodWaitError as fwe:
         log(f"FloodWaitError invoked; Forced waiting for {fwe}")
-        await asyncio.sleep(delay=fwe.seconds)
+        await asyncio.sleep(fwe.seconds)
     except SlowModeWaitError as swe:
         log(f"SlowModeWaitError invoked; Forced waiting for {swe}")
-        await asyncio.sleep(delay=swe.seconds)
+        await asyncio.sleep(swe.seconds)
+    return channel
 
 
 async def send_single_message(channel):
-    log(f"Raiding {channel} once")
+    log(f"Raiding {channel['name']} once")
     await send_message(channel)
 
 
+def calculate_wait_interval(channel):
+    calculated_wait_interval = channel["wait_interval"] + channel["splay"]
+    channel["calculated_wait_interval"] = calculated_wait_interval
+    return channel
+
+
 async def send_looped_message(channel):
-    wait_interval = RAID_CONFIG[channel]["wait_interval"] + splay(channel)
-    log(f"Raiding {channel} every {wait_interval} seconds")
-    while True:
-        await send_message(channel)
-        await asyncio.sleep(wait_interval)
+    channel = calculate_wait_interval(channel)
+    channel["loop"] = True
+    log(
+        f"Raiding {channel['name']} every {channel['calculated_wait_interval']} seconds"
+    )
+    while channel["loop"]:
+        channel = await send_message(channel)
+        await asyncio.sleep(channel["calculated_wait_interval"])
 
 
 def message_once(channel):
-    return "wait_interval" not in RAID_CONFIG[channel]
+    return not bool(channel["wait_interval"])
 
 
 async def raid(channel):
-    await asyncio.sleep(splay(channel))
+    await asyncio.sleep(channel["splay"])
 
     if message_once(channel):
         await send_single_message(channel)
@@ -132,23 +157,29 @@ async def raid(channel):
 
 
 async def connect(channel):
+    is_connected = False
     try:
-        await asyncio.sleep(splay(channel))
-        log(f"Connecting to {channel}")
-        await CLIENT(functions.channels.JoinChannelRequest(channel=channel))
-    except FloodWaitError as fwe:
-        print(f"Waiting for {fwe}")
-        await asyncio.sleep(delay=fwe.seconds)
+        await asyncio.sleep(channel["splay"])
+        log(f"Connecting to {channel['name']}")
+        await CLIENT(functions.channels.JoinChannelRequest(channel=channel["name"]))
+        is_connected = True
+    except Exception as e:
+        message = f"An exception was raised when connecting to {channel['name']}"
+        if hasattr(e, "message"):
+            message = message + "\n{e.message}"
+        log(message)
+    channel["is_connected"] = is_connected
+    return channel
 
 
-async def do_raid():
-    tasks = [raid(channel) for channel in RAID_CONFIG.keys()]
+async def do_raid(channels):
+    tasks = [raid(channel) for channel in channels]
     await asyncio.gather(*tasks)
 
 
 async def do_connect():
-    tasks = [connect(channel) for channel in RAID_CONFIG.keys()]
-    await asyncio.gather(*tasks)
+    tasks = [connect(channel_map(channel)) for channel in RAID_CONFIG.keys()]
+    return await asyncio.gather(*tasks)
 
 
 async def close():
@@ -164,8 +195,8 @@ async def start():
         "Splay will be added to connection and user defined wait intervals"
         + " to avoid Telegram rate limiting"
     )
-    await do_connect()
-    await do_raid()
+    channels = await do_connect()
+    await do_raid(channels)
 
 
 if __name__ == "__main__":
