@@ -106,7 +106,8 @@ def increment_count(channel):
 
 
 async def send_message(channel):
-    log(f"Sending message to {channel['name']}")
+    channel = increment_count(channel)
+    log(f"Sending message to {channel['name']} (#{channel['count']})")
     try:
         new_message = channel["message"] + "\n" + random_thank_you() + "!"
         entity = await get_entity(channel["name"])
@@ -117,7 +118,7 @@ async def send_message(channel):
     except SlowModeWaitError as swe:
         log(f"SlowModeWaitError invoked; Forced waiting for {swe}")
         await asyncio.sleep(swe.seconds)
-    return increment_count(channel)
+    return channel
 
 
 async def send_single_message(channel):
@@ -127,13 +128,13 @@ async def send_single_message(channel):
 
 def calculate_wait_interval(channel):
     calculated_wait_interval = channel["wait_interval"] + channel["splay"]
-    channel.update({"calculated_wait_interval": calculated_wait_interval})
+    channel["calculated_wait_interval"] = calculated_wait_interval
     return channel
 
 
 async def send_looped_message(channel):
     channel = calculate_wait_interval(channel)
-    channel.update({"loop": True})
+    channel["loop"] = True
     log(
         f"Raiding {channel['name']} every {channel['calculated_wait_interval']} seconds"
     )
@@ -167,7 +168,7 @@ async def connect(channel):
         if hasattr(e, "message"):
             message = message + "\n{e.message}"
         log(message)
-    channel.update({"is_connected": is_connected})
+    channel["is_connected"] = is_connected
     return channel
 
 
