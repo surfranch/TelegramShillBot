@@ -107,7 +107,7 @@ def increment_count(channel):
 
 async def handle_floodwaiterror(error, channel):
     log(
-        "FloodWaitError invoked;"
+        "FloodWaitError invoked while sending a message;"
         + f" Forcing {error.seconds} second wait interval for {channel['name']}"
     )
     await asyncio.sleep(error.seconds)
@@ -115,7 +115,7 @@ async def handle_floodwaiterror(error, channel):
 
 def handle_slowmodewaiterror(error, channel):
     log(
-        "SlowModeWaitError invoked;"
+        "SlowModeWaitError invoked while sending a message;"
         + f" Dynamically updating {channel['name']}'s calculated wait interval"
     )
     channel["calculated_wait_interval"] = error.seconds + 10
@@ -123,9 +123,12 @@ def handle_slowmodewaiterror(error, channel):
 
 
 def handle_unknownerror(error, channel):
-    message = f"Unknown error invoked; Abandoning sending messages to {channel['name']}"
+    message = (
+        "Unknown error invoked while sending a message; "
+        + f" Abandoning sending messages to {channel['name']}"
+    )
     if hasattr(error, "message"):
-        message = message + "\n{error.message}"
+        message = message + f"\n{error.message}"
     log(message)
     channel["loop"] = False
     return channel
@@ -182,6 +185,16 @@ async def raid(channel):
         await send_looped_message(channel)
 
 
+def handle_connectionerror(error, channel):
+    message = (
+        "Unknown error invoked while connecting to a channel;"
+        + f" Abandoning sending messages to {channel['name']}"
+    )
+    if hasattr(error, "message"):
+        message = message + f"\n{error.message}"
+    log(message)
+
+
 async def connect(channel):
     is_connected = False
     try:
@@ -190,13 +203,7 @@ async def connect(channel):
         await CLIENT(functions.channels.JoinChannelRequest(channel=channel["name"]))
         is_connected = True
     except Exception as e:
-        message = (
-            f"Error invoked while connecting to {channel['name']};"
-            + f" Abandoning sending messages to {channel['name']}"
-        )
-        if hasattr(e, "message"):
-            message = message + "\n{e.message}"
-        log(message)
+        handle_connectionerror(e, channel)
     channel["is_connected"] = is_connected
     return channel
 
