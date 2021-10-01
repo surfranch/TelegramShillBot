@@ -105,6 +105,35 @@ def increment_count(channel):
     return channel
 
 
+async def handle_floodwaiterror(error, channel):
+    log(
+        "FloodWaitError invoked while sending a message;"
+        + f" Forcing {error.seconds} second wait interval for {channel['name']}"
+    )
+    await asyncio.sleep(error.seconds)
+
+
+def handle_slowmodewaiterror(error, channel):
+    log(
+        "SlowModeWaitError invoked while sending a message;"
+        + f" Dynamically updating {channel['name']}'s calculated wait interval"
+    )
+    channel["calculated_wait_interval"] = error.seconds + 10
+    return channel
+
+
+def handle_unknownerror(error, channel):
+    message = (
+        "Unknown error invoked while sending a message; "
+        + f" Abandoning sending messages to {channel['name']}"
+    )
+    if hasattr(error, "message"):
+        message = message + f"\n{error.message}"
+    log(message)
+    channel["loop"] = False
+    return channel
+
+
 async def send_message(channel):
     channel = increment_count(channel)
     log(f"Sending message to {channel['name']} (#{channel['count']})")
@@ -113,11 +142,11 @@ async def send_message(channel):
         entity = await get_entity(channel["name"])
         await CLIENT.send_message(entity, new_message)
     except FloodWaitError as fwe:
-        log(f"FloodWaitError invoked; Forced waiting for {fwe}")
-        await asyncio.sleep(fwe.seconds)
-    except SlowModeWaitError as swe:
-        log(f"SlowModeWaitError invoked; Forced waiting for {swe}")
-        await asyncio.sleep(swe.seconds)
+        await handle_floodwaiterror(fwe, channel)
+    except SlowModeWaitError as smwe:
+        channel = handle_slowmodewaiterror(smwe, channel)
+    except Exception as e:
+        channel = handle_unknownerror(e, channel)
     return channel
 
 
@@ -156,6 +185,16 @@ async def raid(channel):
         await send_looped_message(channel)
 
 
+def handle_connectionerror(error, channel):
+    message = (
+        "Unknown error invoked while connecting to a channel;"
+        + f" Abandoning sending messages to {channel['name']}"
+    )
+    if hasattr(error, "message"):
+        message = message + f"\n{error.message}"
+    log(message)
+
+
 async def connect(channel):
     is_connected = False
     try:
@@ -164,10 +203,7 @@ async def connect(channel):
         await CLIENT(functions.channels.JoinChannelRequest(channel=channel["name"]))
         is_connected = True
     except Exception as e:
-        message = f"An exception was raised when connecting to {channel['name']}"
-        if hasattr(e, "message"):
-            message = message + "\n{e.message}"
-        log(message)
+        handle_connectionerror(e, channel)
     channel["is_connected"] = is_connected
     return channel
 
@@ -179,7 +215,9 @@ async def do_raid(channels):
 
 async def do_connect():
     tasks = [connect(channel_map(channel)) for channel in RAID_CONFIG.keys()]
-    return await asyncio.gather(*tasks)
+    channels = await asyncio.gather(*tasks)
+    connected_channels = filter(lambda channel: channel["is_connected"], channels)
+    return connected_channels
 
 
 async def close():
