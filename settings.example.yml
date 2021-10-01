@@ -24,3 +24,5 @@ raid:
     # this is in seconds, so the below example is equal to 5 minutes
     # we recommend at least 900 seconds, which is equal to 15 minutes
     wait_interval: 300
+    # this is in seconds, so the below example is equal to 1 minute
+    increase_wait_interval: 60

@@ -95,6 +95,9 @@ def channel_map(channel):
         "name": channel,
         "splay": splay(channel),
         "wait_interval": RAID_CONFIG[channel].get("wait_interval", None),
+        "increase_wait_interval": RAID_CONFIG[channel].get(
+            "increase_wait_interval", None
+        ),
         "message": MESSAGES_CONFIG[RAID_CONFIG[channel]["message_type"]],
         "count": 0,
     }
@@ -161,6 +164,16 @@ def calculate_wait_interval(channel):
     return channel
 
 
+def recalculate_wait_interval(channel):
+    if channel["increase_wait_interval"]:
+        channel["calculated_wait_interval"] += channel["increase_wait_interval"]
+        log(
+            f">> Recalculated {channel['name']} wait interval to"
+            + f" {channel['calculated_wait_interval']} seconds"
+        )
+    return channel
+
+
 async def send_looped_message(channel):
     channel = calculate_wait_interval(channel)
     channel["loop"] = True
@@ -169,6 +182,7 @@ async def send_looped_message(channel):
     )
     while channel["loop"]:
         channel = await send_message(channel)
+        channel = recalculate_wait_interval(channel)
         await asyncio.sleep(channel["calculated_wait_interval"])
 
 

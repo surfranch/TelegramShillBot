@@ -120,6 +120,14 @@ This can cause your account to be rate limited and even banned if you shill too 
         message_type: three
         wait_interval: 60
       # ^^ you can add as many channels as you want as long as the prescribed format is followed
+      iamnotreal:
+        message_type: three
+      # ^^ you don't have to declare a wait interval, the channel will only be raided once
+      iamalsonotreal:
+        message_type: three
+        wait_interval: 300
+        increase_wait_interval: 60
+      # ^^ you can choose to increase the channel's wait interval after every iteration
     ```
 
 - Verify your YAML by copying all of `settings.yml` and paste it into http://www.yamllint.com/
