@@ -29,8 +29,13 @@ def log(message):
 
 def random_thank_you():
     thank_yous = [
+        "Cheers",
         "Thank you",
+        "Thank you so much",
         "Thanks",
+        "Thanks a bunch",
+        "Thanks a million",
+        "Ta",
         "Tak",
         "Dank u",
         "Kiitos",
