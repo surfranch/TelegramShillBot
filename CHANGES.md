@@ -1,3 +1,23 @@
+### v0.9
+##### 10/4/2021
+- added `increase_wait_interval` as a config option, allowing users to gradually increase how frequent messages are sent to a channel
+  - example:
+  ```yaml
+  ...
+  # this example will send a message once every 10 minutues (600 seconds)
+  # after every iteration, 1 minute (60 seconds) will be added to the previous attempt's wait interval
+  # so here is an example sequence of operations:
+  #   - 10m wait, send message, 10m + 1m = 11m
+  #   - 11m wait, send message, 11m + 1m = 12m
+  #   - 12m wait, send message, 12m + 1m = 13m
+  #   - etc, etc, etc
+  somerandomchannelname:
+    message_type: short
+    wait_interval: 600
+    increase_wait_interval: 60
+  ...
+  ```
+
 ### v0.8
 ##### 10/1/2021
 - improved Telethon error handling
