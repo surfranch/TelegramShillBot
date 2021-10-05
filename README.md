@@ -128,6 +128,10 @@ This can cause your account to be rate limited and even banned if you shill too 
         wait_interval: 300
         increase_wait_interval: 60
       # ^^ you can choose to increase the channel's wait interval after every iteration
+      ibfake:
+        message_type: three
+        image: images/awhsum.jpg
+      # ^^ you can choose to send an image with the message
     ```
 
 - Verify your YAML by copying all of `settings.yml` and paste it into http://www.yamllint.com/
@@ -176,8 +180,9 @@ You will be prompted to enter your phone (or bot token) and the Telegram code yo
   $ pip --version
   pip 19.2.3 from ... (python 3.7)
   ```
-- 3 unique Telegram channels
-- 3 unique messages
+- 5 unique Telegram channels
+- 5 unique messages
+- JPG images
 
 ## Contribute
 - We welcome any contribution to the project (issues and PRs)

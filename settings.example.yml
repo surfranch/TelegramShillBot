@@ -26,3 +26,5 @@ raid:
     wait_interval: 300
     # this is in seconds, so the below example is equal to 1 minute
     increase_wait_interval: 60
+    # this assumes the image's path is relative to the script `tg_shill_bot.py`
+    image: images/cd.jpg
