@@ -1,3 +1,18 @@
+### v0.10
+##### 10/5/2021
+- added `image` as a config option (not required), allowing users to send an image with their messages
+  - example:
+  ```yaml
+  ...
+  # this example will send the "short" message and relative image "images/my-awhsum.jpg"
+  # once every 10 minutues (600 seconds)
+  somerandomchannelname:
+    message_type: short
+    wait_interval: 600
+    image: images/my-awhsum.jpg
+  ...
+  ```
+
 ### v0.9
 ##### 10/4/2021
 - added `increase_wait_interval` as a config option, allowing users to gradually increase how frequent messages are sent to a channel
