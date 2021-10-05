@@ -4,6 +4,7 @@ import math
 import random
 import sys
 from datetime import datetime
+from pathlib import Path
 
 import asyncstdlib
 from telethon import TelegramClient, functions
@@ -104,6 +105,7 @@ def channel_map(channel):
             "increase_wait_interval", None
         ),
         "message": MESSAGES_CONFIG[RAID_CONFIG[channel]["message_type"]],
+        "image": RAID_CONFIG[channel].get("image", None),
         "count": 0,
     }
 
@@ -142,13 +144,34 @@ def handle_unknownerror(error, channel):
     return channel
 
 
+def image_exists(channel):
+    result = False
+    if channel["image"]:
+        path = Path(channel["image"])
+        if path.is_file():
+            result = True
+        else:
+            log(
+                f">> Unable to locate {channel['name']}'s configured image {channel['image']};"
+                + " Sending message without image"
+            )
+    return result
+
+
+async def dispatch_message(channel):
+    new_message = channel["message"] + "\n" + random_thank_you() + "!"
+    entity = await get_entity(channel["name"])
+    if image_exists(channel):
+        await CLIENT.send_message(entity, new_message, file=channel["image"])
+    else:
+        await CLIENT.send_message(entity, new_message)
+
+
 async def send_message(channel):
     channel = increment_count(channel)
     log(f"Sending message to {channel['name']} (#{channel['count']})")
     try:
-        new_message = channel["message"] + "\n" + random_thank_you() + "!"
-        entity = await get_entity(channel["name"])
-        await CLIENT.send_message(entity, new_message)
+        await dispatch_message(channel)
     except FloodWaitError as fwe:
         await handle_floodwaiterror(fwe, channel)
     except SlowModeWaitError as smwe:
