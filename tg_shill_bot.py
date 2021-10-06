@@ -1,3 +1,4 @@
+# stdlib
 import asyncio
 import functools
 import math
@@ -6,21 +7,12 @@ import sys
 from datetime import datetime
 from pathlib import Path
 
+# custom
 import asyncstdlib
+import jsonschema
+import yaml
 from telethon import TelegramClient, functions
 from telethon.errors.rpcerrorlist import FloodWaitError, SlowModeWaitError
-
-import yaml
-
-with open("settings.yml", "r", encoding="utf8") as settings:
-    CONFIG = yaml.safe_load(settings)
-
-API_ID = CONFIG["api_id"]
-API_HASH = CONFIG["api_hash"]
-APP_SHORT_NAME = CONFIG["app_short_name"]
-MESSAGES_CONFIG = CONFIG["messages"]
-RAID_CONFIG = CONFIG["raid"]
-CLIENT = None
 
 
 def log(message):
@@ -279,7 +271,19 @@ async def start():
     await do_raid(channels)
 
 
+@functools.lru_cache()
+def load_settings():
+    with open("settings.yml", "r", encoding="utf8") as settings:
+        config = yaml.safe_load(settings)
+    return config
+
+
 if __name__ == "__main__":
+    API_ID = load_settings()["api_id"]
+    API_HASH = load_settings()["api_hash"]
+    APP_SHORT_NAME = load_settings()["app_short_name"]
+    MESSAGES_CONFIG = load_settings()["messages"]
+    RAID_CONFIG = load_settings()["raid"]
     CLIENT = TelegramClient(APP_SHORT_NAME, API_ID, API_HASH)
     LOOP = asyncio.get_event_loop()
     try:
