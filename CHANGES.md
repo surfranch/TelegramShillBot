@@ -1,3 +1,15 @@
+### v0.11
+##### 10/7/2021
+- mostly a developer upgrade
+  - added start of unit testing
+  - added new `Makefile` commands
+  - added 1st go at YAML validation, both at the file load level and the actual data level
+    - using `jsonschema` here
+  - refactored use of GLOBAL vars and cut down on those alot
+  - rolled `open file` bare method into function
+  - functionized some complicated `getting` on some next Dicts
+  - added FAIL message if simple YAML file can't even be loaded
+
 ### v0.10
 ##### 10/5/2021
 - added `image` as a config option (not required), allowing users to send an image with their messages
