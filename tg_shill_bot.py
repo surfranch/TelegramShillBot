@@ -53,12 +53,17 @@ def random_thank_you():
     return thank_yous[random.randrange(len(thank_yous))]
 
 
+def channels_to_raid():
+    settings = load_settings()
+    return settings["raid"].keys()
+
+
 @functools.lru_cache()
 def recommended_splay():
     # all of this assumes TG rate limit is 20 API calls per 1 minute
     segment_time = 72  # 120% of 60 seconds
     max_channels_per_segment = 20  # max calls per segment
-    channels = len(RAID_CONFIG.keys())
+    channels = len(channels_to_raid())
     segments = math.ceil(channels / max_channels_per_segment)
     total_segment_time = segments * segment_time
     default_splay = math.ceil(segment_time / max_channels_per_segment)
@@ -70,7 +75,7 @@ def recommended_splay():
 def splay_map():
     count = 1
     result = {}
-    for channel in RAID_CONFIG.keys():
+    for channel in channels_to_raid():
         result[channel] = count * recommended_splay()
         count += 1
     return result
@@ -87,24 +92,38 @@ async def get_entity(channel):
     return await CLIENT.get_entity(channel)
 
 
+def channel_to_raid(channel):
+    settings = load_settings()
+    return settings["raid"][channel]
+
+
 def channel_message(channel):
     settings = load_settings()
     messages = settings["messages"]
-    channel_to_raid = settings["raid"][channel]
-    message_type = channel_to_raid["message_type"]
+    message_type = channel_to_raid(channel)["message_type"]
     return messages[message_type]
+
+
+def channel_wait_interval(channel):
+    return channel_to_raid(channel).get("wait_interval", None)
+
+
+def channel_increase_wait_interval(channel):
+    return channel_to_raid(channel).get("increase_wait_interval", None)
+
+
+def channel_image(channel):
+    return channel_to_raid(channel).get("image", None)
 
 
 def channel_map(channel):
     return {
         "name": channel,
         "splay": splay(channel),
-        "wait_interval": RAID_CONFIG[channel].get("wait_interval", None),
-        "increase_wait_interval": RAID_CONFIG[channel].get(
-            "increase_wait_interval", None
-        ),
+        "wait_interval": channel_wait_interval(channel),
+        "increase_wait_interval": channel_increase_wait_interval(channel),
         "message": channel_message(channel),
-        "image": RAID_CONFIG[channel].get("image", None),
+        "image": channel_image(channel),
         "count": 0,
     }
 
@@ -255,7 +274,7 @@ async def do_raid(channels):
 
 
 async def do_connect():
-    tasks = [connect(channel_map(channel)) for channel in RAID_CONFIG.keys()]
+    tasks = [connect(channel_map(channel)) for channel in channels_to_raid()]
     channels = await asyncio.gather(*tasks)
     connected_channels = filter(lambda channel: channel["is_connected"], channels)
     return connected_channels
@@ -301,7 +320,6 @@ def app_short_name():
 
 
 if __name__ == "__main__":
-    RAID_CONFIG = load_settings()["raid"]
     CLIENT = TelegramClient(app_short_name(), api_id(), api_hash())
     LOOP = asyncio.get_event_loop()
     try:
