@@ -9,6 +9,7 @@ from pathlib import Path
 
 # custom
 import asyncstdlib
+import jsonschema
 import yaml
 from telethon import TelegramClient, functions
 from telethon.errors.rpcerrorlist import FloodWaitError, SlowModeWaitError
@@ -297,11 +298,52 @@ async def start():
     await do_raid(channels)
 
 
+def validate_account_settings(settings):
+    schema = {
+        "type": "object",
+        "properties": {
+            "api_id": {"type": "number"},
+            "api_hash": {"type": "string"},
+            "app_short_name": {"type": "string"},
+        },
+        "required": [
+            "api_id",
+            "api_hash",
+            "app_short_name",
+        ],
+    }
+    jsonschema.validate(settings, schema)
+
+
 @functools.lru_cache()
-def load_settings():
-    with open("settings.yml", "r", encoding="utf8") as settings:
-        config = yaml.safe_load(settings)
-    return config
+def load_settings(path="settings.yml"):
+    with open(path, "r", encoding="utf8") as settings_file:
+        try:
+            settings = yaml.safe_load(settings_file)
+        except Exception as e:
+            print(
+                """
+!@#!@#!@#!@#!@#!@#!@#!@#!@#!@#!@#!@#!@#!@#!@#!@#!@#!@#
+!@#                                                !@#
+!@#   THE `settings.yml` FILE IS NOT VALID YAML    !@#
+!@#                                                !@#
+!@#!@#!@#!@#!@#!@#!@#!@#!@#!@#!@#!@#!@#!@#!@#!@#!@#!@#
+
+BEFORE ASKING QUESTIONS IN THE SURFRANCH CHANNEL, PLEASE GIVE A BEST EFFORT
+TO FIX THE YAML ERRORS YOURSELF USING THIS LINTER
+
+>>>   http://www.yamllint.com/   <<<
+
+
+IF YOU KNOW NOTHING ABOUT THE YAML SYNTAX, WE RECOMMEND READING THIS TUTORIAL
+
+>>>   https://gettaurus.org/docs/YAMLTutorial/   <<<
+"""
+            )
+            raise e
+
+        validate_account_settings(settings)
+    return settings
 
 
 def api_id():
