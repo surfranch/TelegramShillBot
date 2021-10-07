@@ -9,7 +9,6 @@ from pathlib import Path
 
 # custom
 import asyncstdlib
-import jsonschema
 import yaml
 from telethon import TelegramClient, functions
 from telethon.errors.rpcerrorlist import FloodWaitError, SlowModeWaitError
@@ -88,6 +87,14 @@ async def get_entity(channel):
     return await CLIENT.get_entity(channel)
 
 
+def channel_message(channel):
+    settings = load_settings()
+    messages = settings["messages"]
+    channel_to_raid = settings["raid"][channel]
+    message_type = channel_to_raid["message_type"]
+    return messages[message_type]
+
+
 def channel_map(channel):
     return {
         "name": channel,
@@ -96,7 +103,7 @@ def channel_map(channel):
         "increase_wait_interval": RAID_CONFIG[channel].get(
             "increase_wait_interval", None
         ),
-        "message": MESSAGES_CONFIG[RAID_CONFIG[channel]["message_type"]],
+        "message": channel_message(channel),
         "image": RAID_CONFIG[channel].get("image", None),
         "count": 0,
     }
@@ -278,13 +285,24 @@ def load_settings():
     return config
 
 
+def api_id():
+    settings = load_settings()
+    return settings["api_id"]
+
+
+def api_hash():
+    settings = load_settings()
+    return settings["api_hash"]
+
+
+def app_short_name():
+    settings = load_settings()
+    return settings["app_short_name"]
+
+
 if __name__ == "__main__":
-    API_ID = load_settings()["api_id"]
-    API_HASH = load_settings()["api_hash"]
-    APP_SHORT_NAME = load_settings()["app_short_name"]
-    MESSAGES_CONFIG = load_settings()["messages"]
     RAID_CONFIG = load_settings()["raid"]
-    CLIENT = TelegramClient(APP_SHORT_NAME, API_ID, API_HASH)
+    CLIENT = TelegramClient(app_short_name(), api_id(), api_hash())
     LOOP = asyncio.get_event_loop()
     try:
         LOOP.run_until_complete(start())
