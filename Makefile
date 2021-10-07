@@ -1,13 +1,15 @@
-.PHONY: help clean setup format lint run
+.PHONY: help clean setup format lint test flt run
 
 .DEFAULT: help
 
 help:
-	@echo "make clean"
-	@echo "make setup"
-	@echo "make format"
-	@echo "make lint"
-	@echo "make run"
+	@echo "make clean			deactivate and remove venv and any leftover *.session files"
+	@echo "make setup			create venv and pip install requirements.txt"
+	@echo "make format			run black"
+	@echo "make lint			run pylint"
+	@echo "make test			run unittest"
+	@echo "make flt			run make format, make lint, and make test"
+	@echo "make run			run the bot"
 
 clean:
 	@deactivate > /dev/null 2>&1 || echo "skipping deactivate"
@@ -22,6 +24,11 @@ format:
 
 lint:
 	@. venv/bin/activate && pylint *.py
+
+test:
+	@. venv/bin/activate && python test_tg_shill_bot.py
+
+flt: format lint test
 
 run:
 	@. venv/bin/activate && python tg_shill_bot.py

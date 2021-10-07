@@ -1,3 +1,4 @@
+# stdlib
 import asyncio
 import functools
 import math
@@ -6,21 +7,12 @@ import sys
 from datetime import datetime
 from pathlib import Path
 
+# custom
 import asyncstdlib
+import jsonschema
+import yaml
 from telethon import TelegramClient, functions
 from telethon.errors.rpcerrorlist import FloodWaitError, SlowModeWaitError
-
-import yaml
-
-with open("settings.yml", "r", encoding="utf8") as settings:
-    CONFIG = yaml.safe_load(settings)
-
-API_ID = CONFIG["api_id"]
-API_HASH = CONFIG["api_hash"]
-APP_SHORT_NAME = CONFIG["app_short_name"]
-MESSAGES_CONFIG = CONFIG["messages"]
-RAID_CONFIG = CONFIG["raid"]
-CLIENT = None
 
 
 def log(message):
@@ -62,12 +54,17 @@ def random_thank_you():
     return thank_yous[random.randrange(len(thank_yous))]
 
 
+def channels_to_raid():
+    settings = load_settings()
+    return settings["raid"].keys()
+
+
 @functools.lru_cache()
 def recommended_splay():
     # all of this assumes TG rate limit is 20 API calls per 1 minute
     segment_time = 72  # 120% of 60 seconds
     max_channels_per_segment = 20  # max calls per segment
-    channels = len(RAID_CONFIG.keys())
+    channels = len(channels_to_raid())
     segments = math.ceil(channels / max_channels_per_segment)
     total_segment_time = segments * segment_time
     default_splay = math.ceil(segment_time / max_channels_per_segment)
@@ -79,7 +76,7 @@ def recommended_splay():
 def splay_map():
     count = 1
     result = {}
-    for channel in RAID_CONFIG.keys():
+    for channel in channels_to_raid():
         result[channel] = count * recommended_splay()
         count += 1
     return result
@@ -96,16 +93,38 @@ async def get_entity(channel):
     return await CLIENT.get_entity(channel)
 
 
+def channel_to_raid(channel):
+    settings = load_settings()
+    return settings["raid"][channel]
+
+
+def channel_message(channel):
+    settings = load_settings()
+    messages = settings["messages"]
+    message_type = channel_to_raid(channel)["message_type"]
+    return messages[message_type]
+
+
+def channel_wait_interval(channel):
+    return channel_to_raid(channel).get("wait_interval", None)
+
+
+def channel_increase_wait_interval(channel):
+    return channel_to_raid(channel).get("increase_wait_interval", None)
+
+
+def channel_image(channel):
+    return channel_to_raid(channel).get("image", None)
+
+
 def channel_map(channel):
     return {
         "name": channel,
         "splay": splay(channel),
-        "wait_interval": RAID_CONFIG[channel].get("wait_interval", None),
-        "increase_wait_interval": RAID_CONFIG[channel].get(
-            "increase_wait_interval", None
-        ),
-        "message": MESSAGES_CONFIG[RAID_CONFIG[channel]["message_type"]],
-        "image": RAID_CONFIG[channel].get("image", None),
+        "wait_interval": channel_wait_interval(channel),
+        "increase_wait_interval": channel_increase_wait_interval(channel),
+        "message": channel_message(channel),
+        "image": channel_image(channel),
         "count": 0,
     }
 
@@ -256,7 +275,7 @@ async def do_raid(channels):
 
 
 async def do_connect():
-    tasks = [connect(channel_map(channel)) for channel in RAID_CONFIG.keys()]
+    tasks = [connect(channel_map(channel)) for channel in channels_to_raid()]
     channels = await asyncio.gather(*tasks)
     connected_channels = filter(lambda channel: channel["is_connected"], channels)
     return connected_channels
@@ -279,8 +298,71 @@ async def start():
     await do_raid(channels)
 
 
+def validate_account_settings(settings):
+    schema = {
+        "type": "object",
+        "properties": {
+            "api_id": {"type": "number"},
+            "api_hash": {"type": "string"},
+            "app_short_name": {"type": "string"},
+        },
+        "required": [
+            "api_id",
+            "api_hash",
+            "app_short_name",
+        ],
+    }
+    jsonschema.validate(settings, schema)
+
+
+@functools.lru_cache()
+def load_settings(path="settings.yml"):
+    with open(path, "r", encoding="utf8") as settings_file:
+        try:
+            settings = yaml.safe_load(settings_file)
+        except Exception as e:
+            print(
+                """
+!@#!@#!@#!@#!@#!@#!@#!@#!@#!@#!@#!@#!@#!@#!@#!@#!@#!@#
+!@#                                                !@#
+!@#   THE `settings.yml` FILE IS NOT VALID YAML    !@#
+!@#                                                !@#
+!@#!@#!@#!@#!@#!@#!@#!@#!@#!@#!@#!@#!@#!@#!@#!@#!@#!@#
+
+BEFORE ASKING QUESTIONS IN THE SURFRANCH CHANNEL, PLEASE GIVE A BEST EFFORT
+TO FIX THE YAML ERRORS YOURSELF USING THIS LINTER
+
+>>>   http://www.yamllint.com/   <<<
+
+
+IF YOU KNOW NOTHING ABOUT THE YAML SYNTAX, WE RECOMMEND READING THIS TUTORIAL
+
+>>>   https://gettaurus.org/docs/YAMLTutorial/   <<<
+"""
+            )
+            raise e
+
+        validate_account_settings(settings)
+    return settings
+
+
+def api_id():
+    settings = load_settings()
+    return settings["api_id"]
+
+
+def api_hash():
+    settings = load_settings()
+    return settings["api_hash"]
+
+
+def app_short_name():
+    settings = load_settings()
+    return settings["app_short_name"]
+
+
 if __name__ == "__main__":
-    CLIENT = TelegramClient(APP_SHORT_NAME, API_ID, API_HASH)
+    CLIENT = TelegramClient(app_short_name(), api_id(), api_hash())
     LOOP = asyncio.get_event_loop()
     try:
         LOOP.run_until_complete(start())
