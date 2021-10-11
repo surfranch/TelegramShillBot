@@ -136,16 +136,18 @@ def increment_count(channel):
 
 async def handle_floodwaiterror(error, channel):
     log(
-        "FloodWaitError invoked while sending a message;"
-        + f" Forcing {error.seconds} second wait interval for {channel['name']}"
+        f"FloodWaitError invoked while sending a message to {channel['name']};"
+        + f" Forcing a {error.seconds} second wait interval for all channels"
     )
+    lock_floodwaiterror()
     await asyncio.sleep(error.seconds)
+    unlock_floodwaiterror()
 
 
 def handle_slowmodewaiterror(error, channel):
     log(
-        "SlowModeWaitError invoked while sending a message;"
-        + f" Dynamically updating {channel['name']}'s calculated wait interval"
+        f"SlowModeWaitError invoked while sending a message to {channel['name']};"
+        + f" Dynamically updating the channel's calculated wait interval to {error.seconds + 10}"
     )
     channel["calculated_wait_interval"] = error.seconds + 10
     return channel
@@ -153,8 +155,8 @@ def handle_slowmodewaiterror(error, channel):
 
 def handle_unknownerror(error, channel):
     message = (
-        "Unknown error invoked while sending a message; "
-        + f" Abandoning sending messages to {channel['name']}"
+        f"Unknown error invoked while sending a message to {channel['name']};"
+        + " Abandoning sending all future messages"
     )
     if hasattr(error, "message"):
         message = message + f"\n{error.message}"
@@ -177,18 +179,47 @@ def image_exists(channel):
     return result
 
 
+def lock_floodwaiterror():
+    STATE.update({"floodwaiterror_exists": True})
+
+
+def unlock_floodwaiterror():
+    STATE.update({"floodwaiterror_exists": False})
+
+
+def floodwaiterror_exists():
+    return STATE.get("floodwaiterror_exists", False)
+
+
+def randomized_message(channel):
+    return (
+        channel["message"]
+        + "\n"
+        + random_thank_you()
+        + " & "
+        + random_thank_you()
+        + "!"
+    )
+
+
 async def dispatch_message(channel):
-    new_message = channel["message"] + "\n" + random_thank_you() + "!"
     entity = await get_entity(channel["name"])
-    if image_exists(channel):
-        await CLIENT.send_message(entity, new_message, file=channel["image"])
+    if floodwaiterror_exists():
+        log(
+            f">> Skipped sending message to {channel['name']} due to active FloodWaitError"
+        )
     else:
-        await CLIENT.send_message(entity, new_message)
+        channel = increment_count(channel)
+        log(f"Sending message to {channel['name']} (#{channel['count']})")
+        if image_exists(channel):
+            await CLIENT.send_message(
+                entity, randomized_message(channel), file=channel["image"]
+            )
+        else:
+            await CLIENT.send_message(entity, randomized_message(channel))
 
 
 async def send_message(channel):
-    channel = increment_count(channel)
-    log(f"Sending message to {channel['name']} (#{channel['count']})")
     try:
         await dispatch_message(channel)
     except FloodWaitError as fwe:
@@ -363,6 +394,7 @@ def app_short_name():
 
 if __name__ == "__main__":
     CLIENT = TelegramClient(app_short_name(), api_id(), api_hash())
+    STATE = {}
     LOOP = asyncio.get_event_loop()
     try:
         LOOP.run_until_complete(start())
