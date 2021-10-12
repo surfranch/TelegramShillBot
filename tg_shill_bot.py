@@ -126,6 +126,7 @@ def channel_map(channel):
         "message": channel_message(channel),
         "image": channel_image(channel),
         "count": 0,
+        "is_connected": False,
     }
 
 
@@ -134,7 +135,7 @@ def increment_count(channel):
     return channel
 
 
-async def handle_floodwaiterror(error, channel):
+async def handle_message_floodwaiterror(error, channel):
     log(
         f"FloodWaitError invoked while sending a message to {channel['name']};"
         + f" Forcing a {error.seconds} second wait interval for all channels"
@@ -165,6 +166,18 @@ def handle_unknownerror(error, channel):
     return channel
 
 
+def open_floodwaiterror():
+    STATE.update({"floodwaiterror_exists": True})
+
+
+def close_floodwaiterror():
+    STATE.update({"floodwaiterror_exists": False})
+
+
+def floodwaiterror_exists():
+    return STATE.get("floodwaiterror_exists", False)
+
+
 def image_exists(channel):
     result = False
     if channel["image"]:
@@ -177,18 +190,6 @@ def image_exists(channel):
                 + " Sending message without image"
             )
     return result
-
-
-def open_floodwaiterror():
-    STATE.update({"floodwaiterror_exists": True})
-
-
-def close_floodwaiterror():
-    STATE.update({"floodwaiterror_exists": False})
-
-
-def floodwaiterror_exists():
-    return STATE.get("floodwaiterror_exists", False)
 
 
 def randomized_message(channel):
@@ -218,7 +219,7 @@ async def send_message(channel):
     try:
         await dispatch_message(channel)
     except FloodWaitError as fwe:
-        await handle_floodwaiterror(fwe, channel)
+        await handle_message_floodwaiterror(fwe, channel)
     except SlowModeWaitError as smwe:
         channel = handle_slowmodewaiterror(smwe, channel)
     except Exception as e:
@@ -281,6 +282,16 @@ async def raid(channel):
         await send_looped_message(channel)
 
 
+async def handle_connection_floodwaiterror(error, channel):
+    log(
+        f"FloodWaitError invoked while connecting to {channel['name']};"
+        + f" Forcing a {error.seconds} second wait interval for all channels"
+    )
+    open_floodwaiterror()
+    await asyncio.sleep(error.seconds)
+    close_floodwaiterror()
+
+
 def handle_connectionerror(error, channel):
     message = (
         "Unknown error invoked while connecting to a channel;"
@@ -291,16 +302,21 @@ def handle_connectionerror(error, channel):
     log(message)
 
 
+async def dispatch_connection(channel):
+    await asyncio.sleep(channel["splay"])
+    log(f"Connecting to {channel['name']}")
+    await CLIENT(functions.channels.JoinChannelRequest(channel=channel["name"]))
+    channel["is_connected"] = True
+    return channel
+
+
 async def connect(channel):
-    is_connected = False
     try:
-        await asyncio.sleep(channel["splay"])
-        log(f"Connecting to {channel['name']}")
-        await CLIENT(functions.channels.JoinChannelRequest(channel=channel["name"]))
-        is_connected = True
+        channel = await dispatch_connection(channel)
+    except FloodWaitError as fwe:
+        await handle_connection_floodwaiterror(fwe, channel)
     except Exception as e:
         handle_connectionerror(e, channel)
-    channel["is_connected"] = is_connected
     return channel
 
 
