@@ -317,7 +317,10 @@ async def do_connect():
 
 
 async def close():
-    await CLIENT.log_out()
+    try:
+        await CLIENT.log_out()
+    except Exception:
+        pass
 
 
 async def start():
@@ -406,3 +409,5 @@ if __name__ == "__main__":
     except KeyboardInterrupt:
         LOOP.run_until_complete(close())
         sys.exit(0)
+    except Exception:
+        LOOP.run_until_complete(close())
