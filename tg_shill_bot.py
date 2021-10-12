@@ -90,7 +90,7 @@ def splay(channel):
 
 @asyncstdlib.lru_cache()
 async def get_entity(channel):
-    return await CLIENT.get_entity(channel)
+    return await CLIENT.get_input_entity(channel)
 
 
 def channel_to_raid(channel):
@@ -139,9 +139,9 @@ async def handle_floodwaiterror(error, channel):
         f"FloodWaitError invoked while sending a message to {channel['name']};"
         + f" Forcing a {error.seconds} second wait interval for all channels"
     )
-    lock_floodwaiterror()
+    open_floodwaiterror()
     await asyncio.sleep(error.seconds)
-    unlock_floodwaiterror()
+    close_floodwaiterror()
 
 
 def handle_slowmodewaiterror(error, channel):
@@ -179,11 +179,11 @@ def image_exists(channel):
     return result
 
 
-def lock_floodwaiterror():
+def open_floodwaiterror():
     STATE.update({"floodwaiterror_exists": True})
 
 
-def unlock_floodwaiterror():
+def close_floodwaiterror():
     STATE.update({"floodwaiterror_exists": False})
 
 
@@ -204,19 +204,14 @@ def randomized_message(channel):
 
 async def dispatch_message(channel):
     entity = await get_entity(channel["name"])
-    if floodwaiterror_exists():
-        log(
-            f">> Skipped sending message to {channel['name']} due to active FloodWaitError"
+    channel = increment_count(channel)
+    log(f"Sending message to {channel['name']} (#{channel['count']})")
+    if image_exists(channel):
+        await CLIENT.send_message(
+            entity, randomized_message(channel), file=channel["image"]
         )
     else:
-        channel = increment_count(channel)
-        log(f"Sending message to {channel['name']} (#{channel['count']})")
-        if image_exists(channel):
-            await CLIENT.send_message(
-                entity, randomized_message(channel), file=channel["image"]
-            )
-        else:
-            await CLIENT.send_message(entity, randomized_message(channel))
+        await CLIENT.send_message(entity, randomized_message(channel))
 
 
 async def send_message(channel):
@@ -252,16 +247,25 @@ def recalculate_wait_interval(channel):
     return channel
 
 
+async def message_loop(channel):
+    while channel["loop"]:
+        if floodwaiterror_exists():
+            log(
+                f">> Skipped sending message to {channel['name']} due to active FloodWaitError"
+            )
+        else:
+            channel = await send_message(channel)
+            channel = recalculate_wait_interval(channel)
+        await asyncio.sleep(channel["calculated_wait_interval"])
+
+
 async def send_looped_message(channel):
     channel = calculate_wait_interval(channel)
     channel["loop"] = True
     log(
         f"Raiding {channel['name']} every {channel['calculated_wait_interval']} seconds"
     )
-    while channel["loop"]:
-        channel = await send_message(channel)
-        channel = recalculate_wait_interval(channel)
-        await asyncio.sleep(channel["calculated_wait_interval"])
+    await message_loop(channel)
 
 
 def message_once(channel):
