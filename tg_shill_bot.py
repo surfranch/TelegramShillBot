@@ -90,7 +90,7 @@ def splay(channel):
 
 @asyncstdlib.lru_cache()
 async def get_entity(channel):
-    return await CLIENT.get_entity(channel)
+    return await CLIENT.get_input_entity(channel)
 
 
 def channel_to_raid(channel):
@@ -126,6 +126,7 @@ def channel_map(channel):
         "message": channel_message(channel),
         "image": channel_image(channel),
         "count": 0,
+        "is_connected": False,
     }
 
 
@@ -134,18 +135,20 @@ def increment_count(channel):
     return channel
 
 
-async def handle_floodwaiterror(error, channel):
+async def handle_message_floodwaiterror(error, channel):
     log(
-        "FloodWaitError invoked while sending a message;"
-        + f" Forcing {error.seconds} second wait interval for {channel['name']}"
+        f"FloodWaitError invoked while sending a message to {channel['name']};"
+        + f" Forcing a {error.seconds} second wait interval for all channels"
     )
+    open_floodwaiterror()
     await asyncio.sleep(error.seconds)
+    close_floodwaiterror()
 
 
 def handle_slowmodewaiterror(error, channel):
     log(
-        "SlowModeWaitError invoked while sending a message;"
-        + f" Dynamically updating {channel['name']}'s calculated wait interval"
+        f"SlowModeWaitError invoked while sending a message to {channel['name']};"
+        + f" Dynamically updating the channel's calculated wait interval to {error.seconds + 10}"
     )
     channel["calculated_wait_interval"] = error.seconds + 10
     return channel
@@ -153,14 +156,26 @@ def handle_slowmodewaiterror(error, channel):
 
 def handle_unknownerror(error, channel):
     message = (
-        "Unknown error invoked while sending a message; "
-        + f" Abandoning sending messages to {channel['name']}"
+        f"Unknown error invoked while sending a message to {channel['name']};"
+        + " Abandoning sending all future messages"
     )
     if hasattr(error, "message"):
         message = message + f"\n{error.message}"
     log(message)
     channel["loop"] = False
     return channel
+
+
+def open_floodwaiterror():
+    STATE.update({"floodwaiterror_exists": True})
+
+
+def close_floodwaiterror():
+    STATE.update({"floodwaiterror_exists": False})
+
+
+def floodwaiterror_exists():
+    return STATE.get("floodwaiterror_exists", False)
 
 
 def image_exists(channel):
@@ -177,22 +192,34 @@ def image_exists(channel):
     return result
 
 
+def randomized_message(channel):
+    return (
+        channel["message"]
+        + "\n"
+        + random_thank_you()
+        + " & "
+        + random_thank_you()
+        + "!"
+    )
+
+
 async def dispatch_message(channel):
-    new_message = channel["message"] + "\n" + random_thank_you() + "!"
     entity = await get_entity(channel["name"])
+    channel = increment_count(channel)
+    log(f"Sending message to {channel['name']} (#{channel['count']})")
     if image_exists(channel):
-        await CLIENT.send_message(entity, new_message, file=channel["image"])
+        await CLIENT.send_message(
+            entity, randomized_message(channel), file=channel["image"]
+        )
     else:
-        await CLIENT.send_message(entity, new_message)
+        await CLIENT.send_message(entity, randomized_message(channel))
 
 
 async def send_message(channel):
-    channel = increment_count(channel)
-    log(f"Sending message to {channel['name']} (#{channel['count']})")
     try:
         await dispatch_message(channel)
     except FloodWaitError as fwe:
-        await handle_floodwaiterror(fwe, channel)
+        await handle_message_floodwaiterror(fwe, channel)
     except SlowModeWaitError as smwe:
         channel = handle_slowmodewaiterror(smwe, channel)
     except Exception as e:
@@ -221,16 +248,25 @@ def recalculate_wait_interval(channel):
     return channel
 
 
+async def message_loop(channel):
+    while channel["loop"]:
+        if floodwaiterror_exists():
+            log(
+                f">> Skipped sending message to {channel['name']} due to active FloodWaitError"
+            )
+        else:
+            channel = await send_message(channel)
+            channel = recalculate_wait_interval(channel)
+        await asyncio.sleep(channel["calculated_wait_interval"])
+
+
 async def send_looped_message(channel):
     channel = calculate_wait_interval(channel)
     channel["loop"] = True
     log(
         f"Raiding {channel['name']} every {channel['calculated_wait_interval']} seconds"
     )
-    while channel["loop"]:
-        channel = await send_message(channel)
-        channel = recalculate_wait_interval(channel)
-        await asyncio.sleep(channel["calculated_wait_interval"])
+    await message_loop(channel)
 
 
 def message_once(channel):
@@ -246,6 +282,16 @@ async def raid(channel):
         await send_looped_message(channel)
 
 
+async def handle_connection_floodwaiterror(error, channel):
+    log(
+        f"FloodWaitError invoked while connecting to {channel['name']};"
+        + f" Forcing a {error.seconds} second wait interval for all channels"
+    )
+    open_floodwaiterror()
+    await asyncio.sleep(error.seconds)
+    close_floodwaiterror()
+
+
 def handle_connectionerror(error, channel):
     message = (
         "Unknown error invoked while connecting to a channel;"
@@ -256,16 +302,28 @@ def handle_connectionerror(error, channel):
     log(message)
 
 
-async def connect(channel):
-    is_connected = False
-    try:
+async def sleep_while_floodwaiterror_exists(channel):
+    while floodwaiterror_exists():
+        log(f">> Delaying connecting to {channel['name']} due to active FloodWaitError")
         await asyncio.sleep(channel["splay"])
-        log(f"Connecting to {channel['name']}")
-        await CLIENT(functions.channels.JoinChannelRequest(channel=channel["name"]))
-        is_connected = True
+
+
+async def dispatch_connection(channel):
+    await asyncio.sleep(channel["splay"])
+    await sleep_while_floodwaiterror_exists(channel)
+    log(f"Connecting to {channel['name']}")
+    await CLIENT(functions.channels.JoinChannelRequest(channel=channel["name"]))
+    channel["is_connected"] = True
+    return channel
+
+
+async def connect(channel):
+    try:
+        channel = await dispatch_connection(channel)
+    except FloodWaitError as fwe:
+        await handle_connection_floodwaiterror(fwe, channel)
     except Exception as e:
         handle_connectionerror(e, channel)
-    channel["is_connected"] = is_connected
     return channel
 
 
@@ -282,7 +340,10 @@ async def do_connect():
 
 
 async def close():
-    await CLIENT.log_out()
+    try:
+        await CLIENT.log_out()
+    except Exception:
+        pass
 
 
 async def start():
@@ -363,6 +424,7 @@ def app_short_name():
 
 if __name__ == "__main__":
     CLIENT = TelegramClient(app_short_name(), api_id(), api_hash())
+    STATE = {}
     LOOP = asyncio.get_event_loop()
     try:
         LOOP.run_until_complete(start())
@@ -370,3 +432,5 @@ if __name__ == "__main__":
     except KeyboardInterrupt:
         LOOP.run_until_complete(close())
         sys.exit(0)
+    except Exception:
+        LOOP.run_until_complete(close())
