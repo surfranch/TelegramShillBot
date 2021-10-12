@@ -1,3 +1,7 @@
+### v0.12
+##### 10/12/2021
+- try and improve Telethon flood wait error handling
+
 ### v0.11
 ##### 10/7/2021
 - mostly a developer upgrade
