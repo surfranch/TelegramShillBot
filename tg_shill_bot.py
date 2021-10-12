@@ -302,8 +302,15 @@ def handle_connectionerror(error, channel):
     log(message)
 
 
+async def sleep_while_floodwaiterror_exists(channel):
+    while floodwaiterror_exists():
+        log(f">> Delaying connecting to {channel['name']} due to active FloodWaitError")
+        await asyncio.sleep(channel["splay"])
+
+
 async def dispatch_connection(channel):
     await asyncio.sleep(channel["splay"])
+    await sleep_while_floodwaiterror_exists(channel)
     log(f"Connecting to {channel['name']}")
     await CLIENT(functions.channels.JoinChannelRequest(channel=channel["name"]))
     channel["is_connected"] = True
