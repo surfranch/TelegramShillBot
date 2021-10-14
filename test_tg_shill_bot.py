@@ -70,6 +70,30 @@ class ValidateSettingsTest(unittest.TestCase):
             bad_raid.pop("raid")
             tg_shill_bot.validate_account_settings(bad_raid)
 
+    def test_validate_messages_settings(self):
+        messages_settings = {
+            "messages": {
+                "TesT_123": "this is a legit thing",
+            }
+        }
+
+        # assert legit returns none
+        self.assertIsNone(tg_shill_bot.validate_messages_settings(messages_settings))
+
+        bad_key = messages_settings.copy()
+        # assert bad key raises exception
+        with self.assertRaises(Exception):
+            bad_key["messages"]["bad-key"] = "some bad key"
+            tg_shill_bot.validate_messages_settings(bad_key)
+        bad_key["messages"].pop("bad-key")
+
+        bad_value = messages_settings.copy()
+        # assert bad value raises exception
+        with self.assertRaises(Exception):
+            bad_value["messages"]["bad_value"] = []
+            tg_shill_bot.validate_messages_settings(bad_value)
+        bad_value["messages"].pop("bad_value")
+
 
 if __name__ == "__main__":
     unittest.main()

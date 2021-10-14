@@ -369,6 +369,7 @@ def validate_account_settings(settings):
             "messages": {"type": "object"},
             "raid": {"type": "object"},
         },
+        "additionalProperties": False,
         "required": [
             "api_id",
             "api_hash",
@@ -378,6 +379,16 @@ def validate_account_settings(settings):
         ],
     }
     jsonschema.validate(settings, schema)
+
+
+def validate_messages_settings(settings):
+    schema = {
+        "type": "object",
+        "patternProperties": {"^[a-zA-Z0-9_]+$": {"type": "string"}},
+        "additionalProperties": False,
+        "minProperties": 1,
+    }
+    jsonschema.validate(settings["messages"], schema)
 
 
 @functools.lru_cache()
@@ -408,6 +419,7 @@ IF YOU KNOW NOTHING ABOUT THE YAML SYNTAX, WE RECOMMEND READING THIS TUTORIAL
             raise e
 
         validate_account_settings(settings)
+        validate_messages_settings(settings)
     return settings
 
 
