@@ -94,6 +94,19 @@ class ValidateSettingsTest(unittest.TestCase):
             tg_shill_bot.validate_messages_settings(bad_value)
         bad_value["messages"].pop("bad_value")
 
+    def test_validate_raid_settings(self):
+        raid_settings = {
+            "raid": {
+                "https://spranger.us": {
+                    "message_type": "Some_Me55age_Type",
+                    "wait_interval": 123,
+                },
+            }
+        }
+
+        # assert legit returns none
+        self.assertIsNone(tg_shill_bot.validate_raid_settings(raid_settings))
+
 
 if __name__ == "__main__":
     unittest.main()

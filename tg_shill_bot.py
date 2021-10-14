@@ -391,6 +391,28 @@ def validate_messages_settings(settings):
     jsonschema.validate(settings["messages"], schema)
 
 
+def validate_raid_settings(settings):
+    schema = {
+        "type": "object",
+        "patternProperties": {
+            "^.+$": {
+                "type": "object",
+                "properties": {
+                    "message_type": {"type": "string", "pattern": "^[a-zA-Z0-9_]+$"},
+                    "wait_interval": {"type": "number"},
+                },
+                "additionalProperties": False,
+                "required": [
+                    "message_type",
+                ],
+            }
+        },
+        "additionalProperties": False,
+        "minProperties": 1,
+    }
+    jsonschema.validate(settings["raid"], schema)
+
+
 @functools.lru_cache()
 def load_settings(path="settings.yml"):
     with open(path, "r", encoding="utf8") as settings_file:
