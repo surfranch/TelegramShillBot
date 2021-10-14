@@ -16,6 +16,8 @@ class ValidateSettingsTest(unittest.TestCase):
             "api_id": 123,
             "api_hash": "some api hash",
             "app_short_name": "some app short name",
+            "messages": {},
+            "raid": {},
         }
 
         # assert legit returns none
@@ -49,6 +51,24 @@ class ValidateSettingsTest(unittest.TestCase):
         with self.assertRaises(Exception):
             bad_app_short_name.pop("app_short_name")
             tg_shill_bot.validate_account_settings(bad_app_short_name)
+
+        bad_messages = account_settings.copy()
+        # assert bad messages raises exception
+        with self.assertRaises(Exception):
+            bad_messages["messages"] = []
+            tg_shill_bot.validate_account_settings(bad_messages)
+        with self.assertRaises(Exception):
+            bad_messages.pop("messages")
+            tg_shill_bot.validate_account_settings(bad_messages)
+
+        bad_raid = account_settings.copy()
+        # assert bad raid raises exception
+        with self.assertRaises(Exception):
+            bad_raid["raid"] = []
+            tg_shill_bot.validate_account_settings(bad_raid)
+        with self.assertRaises(Exception):
+            bad_raid.pop("raid")
+            tg_shill_bot.validate_account_settings(bad_raid)
 
 
 if __name__ == "__main__":

@@ -366,11 +366,15 @@ def validate_account_settings(settings):
             "api_id": {"type": "number"},
             "api_hash": {"type": "string"},
             "app_short_name": {"type": "string"},
+            "messages": {"type": "object"},
+            "raid": {"type": "object"},
         },
         "required": [
             "api_id",
             "api_hash",
             "app_short_name",
+            "messages",
+            "raid",
         ],
     }
     jsonschema.validate(settings, schema)
