@@ -72,9 +72,7 @@ class ValidateSettingsTest(unittest.TestCase):
 
     def test_validate_messages_settings(self):
         messages_settings = {
-            "messages": {
-                "TesT_123": "this is a legit thing",
-            }
+            "TesT_123": "this is a legit thing",
         }
 
         # assert legit returns none
@@ -83,29 +81,44 @@ class ValidateSettingsTest(unittest.TestCase):
         bad_key = messages_settings.copy()
         # assert bad key raises exception
         with self.assertRaises(Exception):
-            bad_key["messages"]["bad-key"] = "some bad key"
+            bad_key["bad-key"] = "some bad key"
             tg_shill_bot.validate_messages_settings(bad_key)
-        bad_key["messages"].pop("bad-key")
 
         bad_value = messages_settings.copy()
         # assert bad value raises exception
         with self.assertRaises(Exception):
-            bad_value["messages"]["bad_value"] = []
+            bad_value["bad_value"] = ["some bad value"]
             tg_shill_bot.validate_messages_settings(bad_value)
-        bad_value["messages"].pop("bad_value")
 
     def test_validate_raid_settings(self):
         raid_settings = {
-            "raid": {
-                "https://spranger.us": {
-                    "message_type": "Some_Me55age_Type",
-                    "wait_interval": 123,
-                },
-            }
+            "message_type": "Some_Me55age_Type",
+            "wait_interval": 123,
+            "increase_wait_interval": 123,
+            "image": "images/cd.jpg",
         }
 
         # assert legit returns none
-        self.assertIsNone(tg_shill_bot.validate_raid_settings(raid_settings))
+        legit = {"test-raid": raid_settings}
+        self.assertIsNone(tg_shill_bot.validate_raid_settings(legit))
+
+        bad_wait_interval = {"test-raid": raid_settings.copy()}
+        # assert bad wait interval raises exception
+        with self.assertRaises(Exception):
+            bad_wait_interval["test-raid"]["wait_interval"] = "123"
+            tg_shill_bot.validate_raid_settings(bad_wait_interval)
+
+        bad_increase_wait_interval = {"test-raid": raid_settings.copy()}
+        # assert bad increase wait interval raises exception
+        with self.assertRaises(Exception):
+            bad_increase_wait_interval["test-raid"]["increase_wait_interval"] = "123"
+            tg_shill_bot.validate_raid_settings(bad_increase_wait_interval)
+
+        bad_image = {"test-raid": raid_settings.copy()}
+        # assert bad image raises exception
+        with self.assertRaises(Exception):
+            bad_image["test-raid"]["image"] = 123
+            tg_shill_bot.validate_raid_settings(bad_image)
 
 
 if __name__ == "__main__":
