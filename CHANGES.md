@@ -1,3 +1,22 @@
+### v0.13
+##### 10/19/2021
+- added `phone_number` as a required config option, thus cutting down on having to type it in during startup
+  - example:
+  ```yaml
+  ---
+
+  api_id: 123456
+  api_hash: abc123456YXZ
+  app_short_name: SomeAppName
+  phone_number: "+18888675309"
+  ...
+  ```
+- added many more `settings.yml` validation tests, so startup will fail early if not config'ed properly
+  - related to account settings, message settings, and raid settings
+- added new possible exception error related to "message too long"
+- added more verbose output when an unknown exception occurs
+- only recalc wait interval if message is in a loop
+
 ### v0.12
 ##### 10/12/2021
 - try and improve Telethon flood wait error handling
