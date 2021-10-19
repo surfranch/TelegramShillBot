@@ -4,6 +4,7 @@ import functools
 import math
 import random
 import sys
+import traceback
 from datetime import datetime
 from pathlib import Path
 
@@ -12,7 +13,11 @@ import asyncstdlib
 import jsonschema
 import yaml
 from telethon import TelegramClient, functions
-from telethon.errors.rpcerrorlist import FloodWaitError, SlowModeWaitError
+from telethon.errors.rpcerrorlist import (
+    FloodWaitError,
+    SlowModeWaitError,
+    MediaCaptionTooLongError,
+)
 
 
 def log(message):
@@ -154,6 +159,15 @@ def handle_slowmodewaiterror(error, channel):
     return channel
 
 
+def handle_mediacaptiontoolongerror(channel):
+    log(
+        f"MediaCaptionTooLongError invoked while sending a message to {channel['name']};"
+        + " Abandoning sending all future messages"
+    )
+    channel["loop"] = False
+    return channel
+
+
 def handle_unknownerror(error, channel):
     message = (
         f"Unknown error invoked while sending a message to {channel['name']};"
@@ -162,6 +176,7 @@ def handle_unknownerror(error, channel):
     if hasattr(error, "message"):
         message = message + f"\n{error.message}"
     log(message)
+    traceback.print_exc()
     channel["loop"] = False
     return channel
 
@@ -222,6 +237,8 @@ async def send_message(channel):
         await handle_message_floodwaiterror(fwe, channel)
     except SlowModeWaitError as smwe:
         channel = handle_slowmodewaiterror(smwe, channel)
+    except MediaCaptionTooLongError:
+        channel = handle_mediacaptiontoolongerror(channel)
     except Exception as e:
         channel = handle_unknownerror(e, channel)
     return channel
@@ -239,7 +256,7 @@ def calculate_wait_interval(channel):
 
 
 def recalculate_wait_interval(channel):
-    if channel["increase_wait_interval"]:
+    if channel["loop"] and channel["increase_wait_interval"]:
         channel["calculated_wait_interval"] += channel["increase_wait_interval"]
         log(
             f">> Recalculated {channel['name']} wait interval to"
@@ -347,7 +364,7 @@ async def close():
 
 
 async def start():
-    await CLIENT.start()
+    await CLIENT.start(phone_number())
     await asyncio.sleep(10)
 
     log(f"Calculated splay: {recommended_splay()} seconds")
@@ -366,12 +383,53 @@ def validate_account_settings(settings):
             "api_id": {"type": "number"},
             "api_hash": {"type": "string"},
             "app_short_name": {"type": "string"},
+            "phone_number": {"type": "string"},
+            "messages": {"type": "object"},
+            "raid": {"type": "object"},
         },
+        "additionalProperties": False,
         "required": [
             "api_id",
             "api_hash",
             "app_short_name",
+            "phone_number",
+            "messages",
+            "raid",
         ],
+    }
+    jsonschema.validate(settings, schema)
+
+
+def validate_messages_settings(settings):
+    schema = {
+        "type": "object",
+        "patternProperties": {"^[a-zA-Z0-9_]+$": {"type": "string"}},
+        "additionalProperties": False,
+        "minProperties": 1,
+    }
+    jsonschema.validate(settings, schema)
+
+
+def validate_raid_settings(settings):
+    schema = {
+        "type": "object",
+        "patternProperties": {
+            "^.+$": {
+                "type": "object",
+                "properties": {
+                    "message_type": {"type": "string", "pattern": "^[a-zA-Z0-9_]+$"},
+                    "wait_interval": {"type": "number"},
+                    "increase_wait_interval": {"type": "number"},
+                    "image": {"type": "string"},
+                },
+                "additionalProperties": False,
+                "required": [
+                    "message_type",
+                ],
+            }
+        },
+        "additionalProperties": False,
+        "minProperties": 1,
     }
     jsonschema.validate(settings, schema)
 
@@ -404,6 +462,8 @@ IF YOU KNOW NOTHING ABOUT THE YAML SYNTAX, WE RECOMMEND READING THIS TUTORIAL
             raise e
 
         validate_account_settings(settings)
+        validate_messages_settings(settings["messages"])
+        validate_raid_settings(settings["raid"])
     return settings
 
 
@@ -420,6 +480,11 @@ def api_hash():
 def app_short_name():
     settings = load_settings()
     return settings["app_short_name"]
+
+
+def phone_number():
+    settings = load_settings()
+    return settings["phone_number"]
 
 
 if __name__ == "__main__":

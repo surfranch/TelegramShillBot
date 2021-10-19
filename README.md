@@ -49,6 +49,7 @@ This can cause your account to be rate limited and even banned if you shill too 
     api_id: API_ID
     api_hash: API_HASH
     app_short_name: APP_SHORT_NAME
+    phone_number: "PHONE_NUMBER"
     ...
     ```
   - **AFTER**
@@ -58,6 +59,8 @@ This can cause your account to be rate limited and even banned if you shill too 
     api_id: 123456
     api_hash: abc123xyz456
     app_short_name: MyAwesomeShillBot
+    phone_number: "+18888675309"
+    # ^^ make sure phone number is in quotes
     ...
     ```
 
