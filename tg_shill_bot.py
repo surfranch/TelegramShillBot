@@ -107,7 +107,9 @@ def channel_message(channel):
     settings = load_settings()
     messages = settings["messages"]
     message_type = channel_to_raid(channel)["message_type"]
-    return messages[message_type]
+    if isinstance(message_type, str):
+        message_type = [message_type]
+    return list(map(lambda mt: messages[mt], message_type))
 
 
 def channel_wait_interval(channel):
@@ -129,6 +131,7 @@ def channel_map(channel):
         "wait_interval": channel_wait_interval(channel),
         "increase_wait_interval": channel_increase_wait_interval(channel),
         "message": channel_message(channel),
+        "last_message": -1,
         "image": channel_image(channel),
         "count": 0,
         "is_connected": False,
@@ -207,9 +210,9 @@ def image_exists(channel):
     return result
 
 
-def randomized_message(channel):
+def randomize_message(channel):
     return (
-        channel["message"]
+        channel["message"][channel["last_message"]]
         + "\n"
         + random_thank_you()
         + " & "
@@ -218,21 +221,31 @@ def randomized_message(channel):
     )
 
 
-async def dispatch_message(channel):
+def next_message(channel):
+    proposed_message = channel["last_message"] + 1
+    possible_messages = len(channel["message"]) - 1
+    if proposed_message > possible_messages:
+        use_message = 0
+    else:
+        use_message = proposed_message
+    channel["last_message"] = use_message
+    return [randomize_message(channel), channel]
+
+
+async def dispatch_message(message, channel):
     entity = await get_entity(channel["name"])
     channel = increment_count(channel)
     log(f"Sending message to {channel['name']} (#{channel['count']})")
     if image_exists(channel):
-        await CLIENT.send_message(
-            entity, randomized_message(channel), file=channel["image"]
-        )
+        await CLIENT.send_message(entity, message, file=channel["image"])
     else:
-        await CLIENT.send_message(entity, randomized_message(channel))
+        await CLIENT.send_message(entity, message)
+    return channel
 
 
 async def send_message(channel):
     try:
-        await dispatch_message(channel)
+        channel = await dispatch_message(*next_message(channel))
     except FloodWaitError as fwe:
         await handle_message_floodwaiterror(fwe, channel)
     except SlowModeWaitError as smwe:
@@ -417,7 +430,22 @@ def validate_raid_settings(settings):
             "^.+$": {
                 "type": "object",
                 "properties": {
-                    "message_type": {"type": "string", "pattern": "^[a-zA-Z0-9_]+$"},
+                    "message_type": {
+                        "anyOf": [
+                            {
+                                "type": "string",
+                                "pattern": "^[a-zA-Z0-9_]+$",
+                            },
+                            {
+                                "type": "array",
+                                "minItems": 1,
+                                "items": {
+                                    "type": "string",
+                                    "pattern": "^[a-zA-Z0-9_]+$",
+                                },
+                            },
+                        ]
+                    },
                     "wait_interval": {"type": "number"},
                     "increase_wait_interval": {"type": "number"},
                     "image": {"type": "string"},
