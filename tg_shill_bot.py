@@ -25,8 +25,8 @@ def log(message):
     print("[" + now.strftime("%H:%M:%S.%f")[:-3] + "] " + message)
 
 
-def random_thank_you():
-    thank_yous = [
+def thank_yous():
+    return [
         "Cheers",
         "Thank you",
         "Thank you so much",
@@ -56,7 +56,10 @@ def random_thank_you():
         "Salamat",
         "Khob khun",
     ]
-    return thank_yous[random.randrange(len(thank_yous))]
+
+
+def random_thank_you():
+    return thank_yous()[random.randrange(len(thank_yous()))]
 
 
 def channels_to_raid():
@@ -210,15 +213,8 @@ def image_exists(channel):
     return result
 
 
-def randomize_message(channel):
-    return (
-        channel["message"][channel["last_message"]]
-        + "\n"
-        + random_thank_you()
-        + " & "
-        + random_thank_you()
-        + "!"
-    )
+def randomize_message(channel, ty1=random_thank_you(), ty2=random_thank_you()):
+    return channel["message"][channel["last_message"]] + "\n" + ty1 + " & " + ty2 + "!"
 
 
 def next_message(channel):
@@ -446,8 +442,8 @@ def validate_raid_settings(settings):
                             },
                         ]
                     },
-                    "wait_interval": {"type": "number"},
-                    "increase_wait_interval": {"type": "number"},
+                    "wait_interval": {"type": "number", "exclusiveMinimum": 0},
+                    "increase_wait_interval": {"type": "number", "exclusiveMinimum": 0},
                     "image": {"type": "string"},
                 },
                 "additionalProperties": False,
