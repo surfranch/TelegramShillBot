@@ -364,7 +364,7 @@ async def close():
 
 
 async def start():
-    await CLIENT.start()
+    await CLIENT.start(phone_number())
     await asyncio.sleep(10)
 
     log(f"Calculated splay: {recommended_splay()} seconds")
@@ -383,6 +383,7 @@ def validate_account_settings(settings):
             "api_id": {"type": "number"},
             "api_hash": {"type": "string"},
             "app_short_name": {"type": "string"},
+            "phone_number": {"type": "string"},
             "messages": {"type": "object"},
             "raid": {"type": "object"},
         },
@@ -391,6 +392,7 @@ def validate_account_settings(settings):
             "api_id",
             "api_hash",
             "app_short_name",
+            "phone_number",
             "messages",
             "raid",
         ],
@@ -478,6 +480,11 @@ def api_hash():
 def app_short_name():
     settings = load_settings()
     return settings["app_short_name"]
+
+
+def phone_number():
+    settings = load_settings()
+    return settings["phone_number"]
 
 
 if __name__ == "__main__":

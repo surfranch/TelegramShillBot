@@ -16,6 +16,7 @@ class ValidateSettingsTest(unittest.TestCase):
             "api_id": 123,
             "api_hash": "some api hash",
             "app_short_name": "some app short name",
+            "phone_number": "+18675309",
             "messages": {},
             "raid": {},
         }
@@ -51,6 +52,15 @@ class ValidateSettingsTest(unittest.TestCase):
         with self.assertRaises(Exception):
             bad_app_short_name.pop("app_short_name")
             tg_shill_bot.validate_account_settings(bad_app_short_name)
+
+        bad_phone_number = account_settings.copy()
+        # assert bad phone number raises exception
+        with self.assertRaises(Exception):
+            bad_phone_number["phone_number"] = 123
+            tg_shill_bot.validate_account_settings(bad_phone_number)
+        with self.assertRaises(Exception):
+            bad_app_short_name.pop("phone_number")
+            tg_shill_bot.validate_account_settings(bad_phone_number)
 
         bad_messages = account_settings.copy()
         # assert bad messages raises exception
