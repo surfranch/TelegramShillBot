@@ -3,6 +3,9 @@
 api_id: API_ID
 api_hash: API_HASH
 app_short_name: APP_SHORT_NAME
+phone_number: "PHONE_NUMBER"
+# this has to be in quotes to ensure it is treated as a string
+# e.g. phone_number: "+18888675309"
 
 messages:
   one: |
