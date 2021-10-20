@@ -23,7 +23,11 @@ raid:
     # we recommend at least 900 seconds, which is equal to 15 minutes
     wait_interval: 3
   SOME_OTHER_CHANNEL_NAME:
-    message_type: two
+    # a channel can send multiple message types, so the below example will send messages `one` and `two`
+    # the bot will send one message per wait interval in sequence
+    message_type:
+    - one
+    - two
     # this is in seconds, so the below example is equal to 5 minutes
     # we recommend at least 900 seconds, which is equal to 15 minutes
     wait_interval: 300

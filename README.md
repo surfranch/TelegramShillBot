@@ -130,11 +130,19 @@ This can cause your account to be rate limited and even banned if you shill too 
         message_type: three
         wait_interval: 300
         increase_wait_interval: 60
-      # ^^ you can choose to increase the channel's wait interval after every iteration
+        # ^^ you can choose to increase the channel's wait interval after every iteration
       ibfake:
         message_type: three
         image: images/awhsum.jpg
-      # ^^ you can choose to send an image with the message
+        # ^^ you can choose to send an image with the message
+      isendmany:
+        message_type:
+        - one
+        - two
+        - three
+        # ^^ you can choose to send multiple message types
+        wait_interval: 900
+        image: images/awhsum.jpg
     ```
 
 - Verify your YAML by copying all of `settings.yml` and paste it into http://www.yamllint.com/
