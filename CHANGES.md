@@ -21,6 +21,7 @@
   ...
   ```
 - broked out some code to be more pure
+- added more schema validation to ensure `wait_interval` and `increase_wait_interval` are greater than 0, when defined
 - added more unit tests
 
 ### v0.13
