@@ -161,6 +161,13 @@ class ValidateSettingsTest(unittest.TestCase):
 
         self.assertIn(ty, tg_shill_bot.thank_yous())
 
+    def test_next_message(self):
+        start = 0
+        channel = {"last_message": start, "message": ["msg1", "msg2"]}
+        message, channel = tg_shill_bot.next_message(channel)
+        self.assertIn(channel["message"][channel["last_message"]], message)
+        self.assertEqual(channel["last_message"], start + 1)
+
 
 if __name__ == "__main__":
     unittest.main()
