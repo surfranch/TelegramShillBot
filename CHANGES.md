@@ -1,3 +1,29 @@
+### v0.14
+##### 10/20/2021
+- added ability to define multiple message types per channel
+  - only one message will be sent per wait interval
+  - messages will be sent in the user defined order, so for the below YAML example, the order is:
+    - `some_message`, wait interval;
+    - `some_other_message`, wait interval;
+    - `some_awesome_message`, wait interval;
+    - repeat
+  - example:
+  ```yaml
+  channel_with_many_message_types:
+    message_type:
+    - some_message
+    - some_other_message
+    - some_awesome_message
+    wait_interval: 600
+  channel_with_one_message_type:
+    message_type: some_message
+    wait_interval: 600
+  ...
+  ```
+- broked out some code to be more pure
+- added more schema validation to ensure `wait_interval` and `increase_wait_interval` are greater than 0, when defined
+- added more unit tests
+
 ### v0.13
 ##### 10/19/2021
 - added `phone_number` as a required config option, thus cutting down on having to type it in during startup

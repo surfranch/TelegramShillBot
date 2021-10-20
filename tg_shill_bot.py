@@ -25,8 +25,8 @@ def log(message):
     print("[" + now.strftime("%H:%M:%S.%f")[:-3] + "] " + message)
 
 
-def random_thank_you():
-    thank_yous = [
+def thank_yous():
+    return [
         "Cheers",
         "Thank you",
         "Thank you so much",
@@ -56,7 +56,10 @@ def random_thank_you():
         "Salamat",
         "Khob khun",
     ]
-    return thank_yous[random.randrange(len(thank_yous))]
+
+
+def random_thank_you():
+    return thank_yous()[random.randrange(len(thank_yous()))]
 
 
 def channels_to_raid():
@@ -107,7 +110,9 @@ def channel_message(channel):
     settings = load_settings()
     messages = settings["messages"]
     message_type = channel_to_raid(channel)["message_type"]
-    return messages[message_type]
+    if isinstance(message_type, str):
+        message_type = [message_type]
+    return list(map(lambda mt: messages[mt], message_type))
 
 
 def channel_wait_interval(channel):
@@ -129,6 +134,7 @@ def channel_map(channel):
         "wait_interval": channel_wait_interval(channel),
         "increase_wait_interval": channel_increase_wait_interval(channel),
         "message": channel_message(channel),
+        "last_message": -1,
         "image": channel_image(channel),
         "count": 0,
         "is_connected": False,
@@ -207,32 +213,35 @@ def image_exists(channel):
     return result
 
 
-def randomized_message(channel):
-    return (
-        channel["message"]
-        + "\n"
-        + random_thank_you()
-        + " & "
-        + random_thank_you()
-        + "!"
-    )
+def randomize_message(channel, ty1=random_thank_you(), ty2=random_thank_you()):
+    return channel["message"][channel["last_message"]] + "\n" + ty1 + " & " + ty2 + "!"
 
 
-async def dispatch_message(channel):
+def next_message(channel):
+    proposed_message = channel["last_message"] + 1
+    possible_messages = len(channel["message"]) - 1
+    if proposed_message > possible_messages:
+        use_message = 0
+    else:
+        use_message = proposed_message
+    channel["last_message"] = use_message
+    return [randomize_message(channel), channel]
+
+
+async def dispatch_message(message, channel):
     entity = await get_entity(channel["name"])
     channel = increment_count(channel)
     log(f"Sending message to {channel['name']} (#{channel['count']})")
     if image_exists(channel):
-        await CLIENT.send_message(
-            entity, randomized_message(channel), file=channel["image"]
-        )
+        await CLIENT.send_message(entity, message, file=channel["image"])
     else:
-        await CLIENT.send_message(entity, randomized_message(channel))
+        await CLIENT.send_message(entity, message)
+    return channel
 
 
 async def send_message(channel):
     try:
-        await dispatch_message(channel)
+        channel = await dispatch_message(*next_message(channel))
     except FloodWaitError as fwe:
         await handle_message_floodwaiterror(fwe, channel)
     except SlowModeWaitError as smwe:
@@ -417,9 +426,24 @@ def validate_raid_settings(settings):
             "^.+$": {
                 "type": "object",
                 "properties": {
-                    "message_type": {"type": "string", "pattern": "^[a-zA-Z0-9_]+$"},
-                    "wait_interval": {"type": "number"},
-                    "increase_wait_interval": {"type": "number"},
+                    "message_type": {
+                        "anyOf": [
+                            {
+                                "type": "string",
+                                "pattern": "^[a-zA-Z0-9_]+$",
+                            },
+                            {
+                                "type": "array",
+                                "minItems": 1,
+                                "items": {
+                                    "type": "string",
+                                    "pattern": "^[a-zA-Z0-9_]+$",
+                                },
+                            },
+                        ]
+                    },
+                    "wait_interval": {"type": "number", "exclusiveMinimum": 0},
+                    "increase_wait_interval": {"type": "number", "exclusiveMinimum": 0},
                     "image": {"type": "string"},
                 },
                 "additionalProperties": False,

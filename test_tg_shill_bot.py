@@ -108,8 +108,15 @@ class ValidateSettingsTest(unittest.TestCase):
             "image": "images/cd.jpg",
         }
 
-        # assert legit returns none
+        # assert legit single message type returns none
         legit = {"test-raid": raid_settings}
+        self.assertIsNone(tg_shill_bot.validate_raid_settings(legit))
+        # assert legit many message types returns none
+        legit["test-raid"]["message_type"] = [
+            "Some_Me55age_Type1",
+            "Some_Me55age_Type2",
+            "Some_Me55age_Type3",
+        ]
         self.assertIsNone(tg_shill_bot.validate_raid_settings(legit))
 
         bad_wait_interval = {"test-raid": raid_settings.copy()}
@@ -117,11 +124,17 @@ class ValidateSettingsTest(unittest.TestCase):
         with self.assertRaises(Exception):
             bad_wait_interval["test-raid"]["wait_interval"] = "123"
             tg_shill_bot.validate_raid_settings(bad_wait_interval)
+        with self.assertRaises(Exception):
+            bad_wait_interval["test-raid"]["wait_interval"] = 0
+            tg_shill_bot.validate_raid_settings(bad_wait_interval)
 
         bad_increase_wait_interval = {"test-raid": raid_settings.copy()}
         # assert bad increase wait interval raises exception
         with self.assertRaises(Exception):
             bad_increase_wait_interval["test-raid"]["increase_wait_interval"] = "123"
+            tg_shill_bot.validate_raid_settings(bad_increase_wait_interval)
+        with self.assertRaises(Exception):
+            bad_increase_wait_interval["test-raid"]["increase_wait_interval"] = 0
             tg_shill_bot.validate_raid_settings(bad_increase_wait_interval)
 
         bad_image = {"test-raid": raid_settings.copy()}
@@ -129,6 +142,31 @@ class ValidateSettingsTest(unittest.TestCase):
         with self.assertRaises(Exception):
             bad_image["test-raid"]["image"] = 123
             tg_shill_bot.validate_raid_settings(bad_image)
+
+    def test_randomize_message(self):
+        channel = {
+            "message": ["message 1"],
+            "last_message": 0,
+        }
+        ty1 = "ty1"
+        ty2 = "ty2"
+        message = tg_shill_bot.randomize_message(channel, ty1, ty2)
+
+        self.assertIn(channel["message"][0], message)
+        self.assertIn(ty1, message)
+        self.assertIn(ty2, message)
+
+    def test_random_thank_you(self):
+        ty = tg_shill_bot.random_thank_you()
+
+        self.assertIn(ty, tg_shill_bot.thank_yous())
+
+    def test_next_message(self):
+        start = 0
+        channel = {"last_message": start, "message": ["msg1", "msg2"]}
+        message, channel = tg_shill_bot.next_message(channel)
+        self.assertIn(channel["message"][channel["last_message"]], message)
+        self.assertEqual(channel["last_message"], start + 1)
 
 
 if __name__ == "__main__":
