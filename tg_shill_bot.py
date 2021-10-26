@@ -127,6 +127,10 @@ def channel_image(channel):
     return channel_to_raid(channel).get("image", None)
 
 
+def channel_total_messages(channel):
+    return channel_to_raid(channel).get("total_messages", 999999999999)
+
+
 def channel_map(channel):
     return {
         "name": channel,
@@ -136,6 +140,7 @@ def channel_map(channel):
         "message": channel_message(channel),
         "last_message": -1,
         "image": channel_image(channel),
+        "total_messages": channel_total_messages(channel),
         "count": 0,
         "is_connected": False,
     }
@@ -274,6 +279,13 @@ def recalculate_wait_interval(channel):
     return channel
 
 
+def resolve_total_messages(channel):
+    if channel["count"] >= channel["total_messages"]:
+        channel["loop"] = False
+        log(">> Allowed total messages reached; Stopping message loop")
+    return channel
+
+
 async def message_loop(channel):
     while channel["loop"]:
         if floodwaiterror_exists():
@@ -283,6 +295,7 @@ async def message_loop(channel):
         else:
             channel = await send_message(channel)
             channel = recalculate_wait_interval(channel)
+            channel = resolve_total_messages(channel)
         await asyncio.sleep(channel["calculated_wait_interval"])
 
 
@@ -444,6 +457,7 @@ def validate_raid_settings(settings):
                     },
                     "wait_interval": {"type": "number", "exclusiveMinimum": 0},
                     "increase_wait_interval": {"type": "number", "exclusiveMinimum": 0},
+                    "total_messages": {"type": "number", "exclusiveMinimum": 0},
                     "image": {"type": "string"},
                 },
                 "additionalProperties": False,

@@ -105,6 +105,7 @@ class ValidateSettingsTest(unittest.TestCase):
             "message_type": "Some_Me55age_Type",
             "wait_interval": 123,
             "increase_wait_interval": 123,
+            "total_messages": 123,
             "image": "images/cd.jpg",
         }
 
@@ -137,6 +138,15 @@ class ValidateSettingsTest(unittest.TestCase):
             bad_increase_wait_interval["test-raid"]["increase_wait_interval"] = 0
             tg_shill_bot.validate_raid_settings(bad_increase_wait_interval)
 
+        bad_total_messages = {"test-raid": raid_settings.copy()}
+        # assert bad total messages raises exception
+        with self.assertRaises(Exception):
+            bad_total_messages["test-raid"]["total_messages"] = "123"
+            tg_shill_bot.validate_raid_settings(bad_total_messages)
+        with self.assertRaises(Exception):
+            bad_total_messages["test-raid"]["total_messages"] = 0
+            tg_shill_bot.validate_raid_settings(bad_total_messages)
+
         bad_image = {"test-raid": raid_settings.copy()}
         # assert bad image raises exception
         with self.assertRaises(Exception):
@@ -167,6 +177,14 @@ class ValidateSettingsTest(unittest.TestCase):
         message, channel = tg_shill_bot.next_message(channel)
         self.assertIn(channel["message"][channel["last_message"]], message)
         self.assertEqual(channel["last_message"], start + 1)
+
+    def test_resolve_total_messages(self):
+        go_chl = {"count": 1, "total_messages": 3, "loop": True}
+        stop_chl1 = {"count": 3, "total_messages": 3, "loop": True}
+        stop_chl2 = {"count": 4, "total_messages": 3, "loop": True}
+        self.assertEqual(tg_shill_bot.resolve_total_messages(go_chl)["loop"], True)
+        self.assertEqual(tg_shill_bot.resolve_total_messages(stop_chl1)["loop"], False)
+        self.assertEqual(tg_shill_bot.resolve_total_messages(stop_chl2)["loop"], False)
 
 
 if __name__ == "__main__":
