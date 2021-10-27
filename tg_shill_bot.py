@@ -62,6 +62,22 @@ def random_thank_you():
     return thank_yous()[random.randrange(len(thank_yous()))]
 
 
+def header():
+    surfranch = """
+┏━━━┓━━━━━━━━┏━┓┏━━━┓━━━━━━━━━━━━━┏┓━━
+┃┏━┓┃━━━━━━━━┃┏┛┃┏━┓┃━━━━━━━━━━━━━┃┃━━
+┃┗━━┓┏┓┏┓┏━┓┏┛┗┓┃┗━┛┃┏━━┓━┏━┓━┏━━┓┃┗━┓
+┗━━┓┃┃┃┃┃┃┏┛┗┓┏┛┃┏┓┏┛┗━┓┃━┃┏┓┓┃┏━┛┃┏┓┃
+┃┗━┛┃┃┗┛┃┃┃━━┃┃━┃┃┃┗┓┃┗┛┗┓┃┃┃┃┃┗━┓┃┃┃┃
+┗━━━┛┗━━┛┗┛━━┗┛━┗┛┗━┛┗━━━┛┗┛┗┛┗━━┛┗┛┗┛
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+━━ v0.15 ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+Visit: https://t.me/joinchat/Sp3ACd_CTKA0MWIx
+"""
+    print(surfranch)
+
+
 def channels_to_raid():
     settings = load_settings()
     return settings["raid"].keys()
@@ -526,6 +542,7 @@ def phone_number():
 
 
 if __name__ == "__main__":
+    header()
     CLIENT = TelegramClient(app_short_name(), api_id(), api_hash())
     STATE = {}
     LOOP = asyncio.get_event_loop()
