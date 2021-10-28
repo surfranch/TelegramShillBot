@@ -1,3 +1,19 @@
+### v0.15
+##### 10/28/2021
+- added ability to define the maximum number of messages sent to a channel
+  - option is `total_messages`
+  - this allows a user to NOT SPAM a channel once they feel they have sent enough messages
+  - might help build/maintain their rep
+  - example:
+  ```yaml
+  channel_with_max_total:
+    message_type: some_message
+    wait_interval: 600
+    total_messages: 100
+  ...
+  ```
+- added a banner to the startup, maybe it will discourage wankers ?? doubt it
+
 ### v0.14
 ##### 10/20/2021
 - added ability to define multiple message types per channel

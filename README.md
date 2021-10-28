@@ -143,6 +143,11 @@ This can cause your account to be rate limited and even banned if you shill too 
         # ^^ you can choose to send multiple message types
         wait_interval: 900
         image: images/awhsum.jpg
+      iwillstop:
+        message_type: three
+        wait_interval: 900
+        total_messages: 50
+        # ^^ you can choose to limit how many messages are sent to a channel
     ```
 
 - Verify your YAML by copying all of `settings.yml` and paste it into http://www.yamllint.com/

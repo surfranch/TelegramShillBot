@@ -33,5 +33,7 @@ raid:
     wait_interval: 300
     # this is in seconds, so the below example is equal to 1 minute
     increase_wait_interval: 60
+    # a channel can limit the total number of messages sent, so the below example will send a maximum of 10 messages
+    total_messages: 10
     # this assumes the image's path is relative to the script `tg_shill_bot.py`
     image: images/cd.jpg

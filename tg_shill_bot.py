@@ -62,6 +62,22 @@ def random_thank_you():
     return thank_yous()[random.randrange(len(thank_yous()))]
 
 
+def header():
+    surfranch = """
+┏━━━┓━━━━━━━━┏━┓┏━━━┓━━━━━━━━━━━━━┏┓━━
+┃┏━┓┃━━━━━━━━┃┏┛┃┏━┓┃━━━━━━━━━━━━━┃┃━━
+┃┗━━┓┏┓┏┓┏━┓┏┛┗┓┃┗━┛┃┏━━┓━┏━┓━┏━━┓┃┗━┓
+┗━━┓┃┃┃┃┃┃┏┛┗┓┏┛┃┏┓┏┛┗━┓┃━┃┏┓┓┃┏━┛┃┏┓┃
+┃┗━┛┃┃┗┛┃┃┃━━┃┃━┃┃┃┗┓┃┗┛┗┓┃┃┃┃┃┗━┓┃┃┃┃
+┗━━━┛┗━━┛┗┛━━┗┛━┗┛┗━┛┗━━━┛┗┛┗┛┗━━┛┗┛┗┛
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+━━ v0.15 ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+Visit: https://t.me/joinchat/Sp3ACd_CTKA0MWIx
+"""
+    print(surfranch)
+
+
 def channels_to_raid():
     settings = load_settings()
     return settings["raid"].keys()
@@ -127,6 +143,10 @@ def channel_image(channel):
     return channel_to_raid(channel).get("image", None)
 
 
+def channel_total_messages(channel):
+    return channel_to_raid(channel).get("total_messages", 999999999999)
+
+
 def channel_map(channel):
     return {
         "name": channel,
@@ -136,6 +156,7 @@ def channel_map(channel):
         "message": channel_message(channel),
         "last_message": -1,
         "image": channel_image(channel),
+        "total_messages": channel_total_messages(channel),
         "count": 0,
         "is_connected": False,
     }
@@ -174,7 +195,15 @@ def handle_mediacaptiontoolongerror(channel):
     return channel
 
 
-def handle_unknownerror(error, channel):
+def handle_unknownerror(error):
+    message = "Unknown error invoked while running bot; Abandoning all execution"
+    if hasattr(error, "message"):
+        message = message + f"\n{error.message}"
+    log(message)
+    traceback.print_exc()
+
+
+def handle_unknownmessagingerror(error, channel):
     message = (
         f"Unknown error invoked while sending a message to {channel['name']};"
         + " Abandoning sending all future messages"
@@ -249,7 +278,7 @@ async def send_message(channel):
     except MediaCaptionTooLongError:
         channel = handle_mediacaptiontoolongerror(channel)
     except Exception as e:
-        channel = handle_unknownerror(e, channel)
+        channel = handle_unknownmessagingerror(e, channel)
     return channel
 
 
@@ -274,6 +303,14 @@ def recalculate_wait_interval(channel):
     return channel
 
 
+def resolve_total_messages(channel):
+    if channel["count"] >= channel["total_messages"]:
+        channel["loop"] = False
+        channel["calculated_wait_interval"] = 1
+        log(">> Allowed total messages reached; Stopping message loop")
+    return channel
+
+
 async def message_loop(channel):
     while channel["loop"]:
         if floodwaiterror_exists():
@@ -283,6 +320,7 @@ async def message_loop(channel):
         else:
             channel = await send_message(channel)
             channel = recalculate_wait_interval(channel)
+            channel = resolve_total_messages(channel)
         await asyncio.sleep(channel["calculated_wait_interval"])
 
 
@@ -365,7 +403,7 @@ async def do_connect():
     return connected_channels
 
 
-async def close():
+async def stop():
     try:
         await CLIENT.log_out()
     except Exception:
@@ -444,6 +482,7 @@ def validate_raid_settings(settings):
                     },
                     "wait_interval": {"type": "number", "exclusiveMinimum": 0},
                     "increase_wait_interval": {"type": "number", "exclusiveMinimum": 0},
+                    "total_messages": {"type": "number", "exclusiveMinimum": 0},
                     "image": {"type": "string"},
                 },
                 "additionalProperties": False,
@@ -491,6 +530,17 @@ IF YOU KNOW NOTHING ABOUT THE YAML SYNTAX, WE RECOMMEND READING THIS TUTORIAL
     return settings
 
 
+def handle_start_floodwaiterror(error):
+    message = (
+        "FloodWaitError invoked while communicating with Telegram during start;"
+        + " Nothing can be done at this time; Abandoning all execution"
+    )
+    if hasattr(error, "message"):
+        message = message + f"\n{error.message}"
+    log(message)
+    traceback.print_exc()
+
+
 def api_id():
     settings = load_settings()
     return settings["api_id"]
@@ -512,14 +562,19 @@ def phone_number():
 
 
 if __name__ == "__main__":
+    header()
     CLIENT = TelegramClient(app_short_name(), api_id(), api_hash())
     STATE = {}
     LOOP = asyncio.get_event_loop()
     try:
         LOOP.run_until_complete(start())
-        LOOP.run_until_complete(close())
+        LOOP.run_until_complete(stop())
     except KeyboardInterrupt:
-        LOOP.run_until_complete(close())
+        LOOP.run_until_complete(stop())
         sys.exit(0)
-    except Exception:
-        LOOP.run_until_complete(close())
+    except FloodWaitError as start_fwe:
+        handle_start_floodwaiterror(start_fwe)
+        LOOP.run_until_complete(stop())
+    except Exception as start_error:
+        handle_unknownerror(start_error)
+        LOOP.run_until_complete(stop())
