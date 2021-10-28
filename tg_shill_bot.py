@@ -298,6 +298,7 @@ def recalculate_wait_interval(channel):
 def resolve_total_messages(channel):
     if channel["count"] >= channel["total_messages"]:
         channel["loop"] = False
+        channel["calculated_wait_interval"] = 1
         log(">> Allowed total messages reached; Stopping message loop")
     return channel
 
