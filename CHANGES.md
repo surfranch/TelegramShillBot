@@ -1,5 +1,5 @@
 ### v0.15
-##### 10/27/2021
+##### 10/29/2021
 - added ability to define the maximum number of messages sent to a channel
   - option is `total_messages`
   - this allows a user to NOT SPAM a channel once they feel they have sent enough messages

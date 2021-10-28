@@ -195,7 +195,15 @@ def handle_mediacaptiontoolongerror(channel):
     return channel
 
 
-def handle_unknownerror(error, channel):
+def handle_unknownerror(error):
+    message = "Unknown error invoked while running bot; Abandoning all execution"
+    if hasattr(error, "message"):
+        message = message + f"\n{error.message}"
+    log(message)
+    traceback.print_exc()
+
+
+def handle_unknownmessagingerror(error, channel):
     message = (
         f"Unknown error invoked while sending a message to {channel['name']};"
         + " Abandoning sending all future messages"
@@ -270,7 +278,7 @@ async def send_message(channel):
     except MediaCaptionTooLongError:
         channel = handle_mediacaptiontoolongerror(channel)
     except Exception as e:
-        channel = handle_unknownerror(e, channel)
+        channel = handle_unknownmessagingerror(e, channel)
     return channel
 
 
@@ -395,7 +403,7 @@ async def do_connect():
     return connected_channels
 
 
-async def close():
+async def stop():
     try:
         await CLIENT.log_out()
     except Exception:
@@ -522,6 +530,17 @@ IF YOU KNOW NOTHING ABOUT THE YAML SYNTAX, WE RECOMMEND READING THIS TUTORIAL
     return settings
 
 
+def handle_start_floodwaiterror(error):
+    message = (
+        "FloodWaitError invoked while communicating with Telegram during start;"
+        + " Nothing can be done at this time; Abandoning all execution"
+    )
+    if hasattr(error, "message"):
+        message = message + f"\n{error.message}"
+    log(message)
+    traceback.print_exc()
+
+
 def api_id():
     settings = load_settings()
     return settings["api_id"]
@@ -549,9 +568,13 @@ if __name__ == "__main__":
     LOOP = asyncio.get_event_loop()
     try:
         LOOP.run_until_complete(start())
-        LOOP.run_until_complete(close())
+        LOOP.run_until_complete(stop())
     except KeyboardInterrupt:
-        LOOP.run_until_complete(close())
+        LOOP.run_until_complete(stop())
         sys.exit(0)
-    except Exception:
-        LOOP.run_until_complete(close())
+    except FloodWaitError as start_fwe:
+        handle_start_floodwaiterror(start_fwe)
+        LOOP.run_until_complete(stop())
+    except Exception as start_error:
+        handle_unknownerror(start_error)
+        LOOP.run_until_complete(stop())
