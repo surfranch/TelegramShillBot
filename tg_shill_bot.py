@@ -273,7 +273,11 @@ def image_exists(channel):
     return result
 
 
-def randomize_message(channel, ty1=random_thank_you(), ty2=random_thank_you()):
+def randomize_message(channel, ty1=None, ty2=None):
+    if not ty1:
+        ty1 = random_thank_you()
+    if not ty2:
+        ty2 = random_thank_you()
     return channel["message"][channel["last_message"]] + "\n" + ty1 + " & " + ty2 + "!"
 
 
