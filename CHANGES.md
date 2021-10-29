@@ -1,3 +1,7 @@
+### v0.17
+##### 10/29/2021
+- bug fix to ensure random thank yous are indeed random
+
 ### v0.16
 ##### 10/29/2021
 - just adding some color to the output

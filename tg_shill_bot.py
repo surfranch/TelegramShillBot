@@ -20,6 +20,8 @@ from telethon.errors.rpcerrorlist import (
     MediaCaptionTooLongError,
 )
 
+VERSION = "v0.17"
+
 
 class Style(Enum):
     RED = "\033[31m"
@@ -101,7 +103,7 @@ def header():
 ┃┗━┛┃┃┗┛┃┃┃━━┃┃━┃┃┃┗┓┃┗┛┗┓┃┃┃┃┃┗━┓┃┃┃┃
 ┗━━━┛┗━━┛┗┛━━┗┛━┗┛┗━┛┗━━━┛┗┛┗┛┗━━┛┗┛┗┛
 ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
-━━ v0.16 ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+━━ {VERSION} ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
 Visit: https://t.me/joinchat/Sp3ACd_CTKA0MWIx{Style.RESET.value}
 """
