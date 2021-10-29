@@ -1,3 +1,7 @@
+### v0.16
+##### 10/29/2021
+- just adding some color to the output
+
 ### v0.15
 ##### 10/28/2021
 - added ability to define the maximum number of messages sent to a channel

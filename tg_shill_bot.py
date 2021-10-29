@@ -6,6 +6,7 @@ import random
 import sys
 import traceback
 from datetime import datetime
+from enum import Enum
 from pathlib import Path
 
 # custom
@@ -20,9 +21,38 @@ from telethon.errors.rpcerrorlist import (
 )
 
 
-def log(message):
+class Style(Enum):
+    RED = "\033[31m"
+    GREEN = "\033[32m"
+    YELLOW = "\033[33m"
+    CYAN = "\033[36m"
+    RESET = "\033[0m"
+
+
+def log_color(color, message):
     now = datetime.now()
-    print("[" + now.strftime("%H:%M:%S.%f")[:-3] + "] " + message)
+    message = (
+        color
+        + "["
+        + now.strftime("%H:%M:%S.%f")[:-3]
+        + "] "
+        + message
+        + Style.RESET.value
+    )
+    print(message)
+    return message
+
+
+def log_green(message):
+    return log_color(Style.GREEN.value, message)
+
+
+def log_yellow(message):
+    return log_color(Style.YELLOW.value, message)
+
+
+def log_red(message):
+    return log_color(Style.RED.value, message)
 
 
 def thank_yous():
@@ -63,7 +93,7 @@ def random_thank_you():
 
 
 def header():
-    surfranch = """
+    surfranch = f"""{Style.CYAN.value}
 ┏━━━┓━━━━━━━━┏━┓┏━━━┓━━━━━━━━━━━━━┏┓━━
 ┃┏━┓┃━━━━━━━━┃┏┛┃┏━┓┃━━━━━━━━━━━━━┃┃━━
 ┃┗━━┓┏┓┏┓┏━┓┏┛┗┓┃┗━┛┃┏━━┓━┏━┓━┏━━┓┃┗━┓
@@ -71,11 +101,12 @@ def header():
 ┃┗━┛┃┃┗┛┃┃┃━━┃┃━┃┃┃┗┓┃┗┛┗┓┃┃┃┃┃┗━┓┃┃┃┃
 ┗━━━┛┗━━┛┗┛━━┗┛━┗┛┗━┛┗━━━┛┗┛┗┛┗━━┛┗┛┗┛
 ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
-━━ v0.15 ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+━━ v0.16 ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-Visit: https://t.me/joinchat/Sp3ACd_CTKA0MWIx
+Visit: https://t.me/joinchat/Sp3ACd_CTKA0MWIx{Style.RESET.value}
 """
     print(surfranch)
+    return surfranch
 
 
 def channels_to_raid():
@@ -168,7 +199,7 @@ def increment_count(channel):
 
 
 async def handle_message_floodwaiterror(error, channel):
-    log(
+    log_red(
         f"FloodWaitError invoked while sending a message to {channel['name']};"
         + f" Forcing a {error.seconds} second wait interval for all channels"
     )
@@ -178,7 +209,7 @@ async def handle_message_floodwaiterror(error, channel):
 
 
 def handle_slowmodewaiterror(error, channel):
-    log(
+    log_red(
         f"SlowModeWaitError invoked while sending a message to {channel['name']};"
         + f" Dynamically updating the channel's calculated wait interval to {error.seconds + 10}"
     )
@@ -187,7 +218,7 @@ def handle_slowmodewaiterror(error, channel):
 
 
 def handle_mediacaptiontoolongerror(channel):
-    log(
+    log_red(
         f"MediaCaptionTooLongError invoked while sending a message to {channel['name']};"
         + " Abandoning sending all future messages"
     )
@@ -199,7 +230,7 @@ def handle_unknownerror(error):
     message = "Unknown error invoked while running bot; Abandoning all execution"
     if hasattr(error, "message"):
         message = message + f"\n{error.message}"
-    log(message)
+    log_red(message)
     traceback.print_exc()
 
 
@@ -210,7 +241,7 @@ def handle_unknownmessagingerror(error, channel):
     )
     if hasattr(error, "message"):
         message = message + f"\n{error.message}"
-    log(message)
+    log_red(message)
     traceback.print_exc()
     channel["loop"] = False
     return channel
@@ -235,7 +266,7 @@ def image_exists(channel):
         if path.is_file():
             result = True
         else:
-            log(
+            log_yellow(
                 f">> Unable to locate {channel['name']}'s configured image {channel['image']};"
                 + " Sending message without image"
             )
@@ -260,7 +291,7 @@ def next_message(channel):
 async def dispatch_message(message, channel):
     entity = await get_entity(channel["name"])
     channel = increment_count(channel)
-    log(f"Sending message to {channel['name']} (#{channel['count']})")
+    log_green(f"Sending message to {channel['name']} (#{channel['count']})")
     if image_exists(channel):
         await CLIENT.send_message(entity, message, file=channel["image"])
     else:
@@ -283,7 +314,7 @@ async def send_message(channel):
 
 
 async def send_single_message(channel):
-    log(f"Raiding {channel['name']} once")
+    log_green(f"Raiding {channel['name']} once")
     await send_message(channel)
 
 
@@ -296,7 +327,7 @@ def calculate_wait_interval(channel):
 def recalculate_wait_interval(channel):
     if channel["loop"] and channel["increase_wait_interval"]:
         channel["calculated_wait_interval"] += channel["increase_wait_interval"]
-        log(
+        log_yellow(
             f">> Recalculated {channel['name']} wait interval to"
             + f" {channel['calculated_wait_interval']} seconds"
         )
@@ -307,14 +338,14 @@ def resolve_total_messages(channel):
     if channel["count"] >= channel["total_messages"]:
         channel["loop"] = False
         channel["calculated_wait_interval"] = 1
-        log(">> Allowed total messages reached; Stopping message loop")
+        log_yellow(">> Allowed total messages reached; Stopping message loop")
     return channel
 
 
 async def message_loop(channel):
     while channel["loop"]:
         if floodwaiterror_exists():
-            log(
+            log_yellow(
                 f">> Skipped sending message to {channel['name']} due to active FloodWaitError"
             )
         else:
@@ -327,7 +358,7 @@ async def message_loop(channel):
 async def send_looped_message(channel):
     channel = calculate_wait_interval(channel)
     channel["loop"] = True
-    log(
+    log_green(
         f"Raiding {channel['name']} every {channel['calculated_wait_interval']} seconds"
     )
     await message_loop(channel)
@@ -347,7 +378,7 @@ async def raid(channel):
 
 
 async def handle_connection_floodwaiterror(error, channel):
-    log(
+    log_red(
         f"FloodWaitError invoked while connecting to {channel['name']};"
         + f" Forcing a {error.seconds} second wait interval for all channels"
     )
@@ -363,19 +394,21 @@ def handle_connectionerror(error, channel):
     )
     if hasattr(error, "message"):
         message = message + f"\n{error.message}"
-    log(message)
+    log_red(message)
 
 
 async def sleep_while_floodwaiterror_exists(channel):
     while floodwaiterror_exists():
-        log(f">> Delaying connecting to {channel['name']} due to active FloodWaitError")
+        log_yellow(
+            f">> Delaying connecting to {channel['name']} due to active FloodWaitError"
+        )
         await asyncio.sleep(channel["splay"])
 
 
 async def dispatch_connection(channel):
     await asyncio.sleep(channel["splay"])
     await sleep_while_floodwaiterror_exists(channel)
-    log(f"Connecting to {channel['name']}")
+    log_green(f"Connecting to {channel['name']}")
     await CLIENT(functions.channels.JoinChannelRequest(channel=channel["name"]))
     channel["is_connected"] = True
     return channel
@@ -414,8 +447,9 @@ async def start():
     await CLIENT.start(phone_number())
     await asyncio.sleep(10)
 
-    log(f"Calculated splay: {recommended_splay()} seconds")
-    log(
+    print("")
+    log_green(f"Calculated splay: {recommended_splay()} seconds")
+    log_green(
         "Splay will be added to connection and user defined wait intervals"
         + " to avoid Telegram rate limiting"
     )
@@ -504,23 +538,23 @@ def load_settings(path="settings.yml"):
             settings = yaml.safe_load(settings_file)
         except Exception as e:
             print(
-                """
+                f"""
+{Style.RED.value}
 !@#!@#!@#!@#!@#!@#!@#!@#!@#!@#!@#!@#!@#!@#!@#!@#!@#!@#
 !@#                                                !@#
 !@#   THE `settings.yml` FILE IS NOT VALID YAML    !@#
 !@#                                                !@#
 !@#!@#!@#!@#!@#!@#!@#!@#!@#!@#!@#!@#!@#!@#!@#!@#!@#!@#
+{Style.RESET.value}{Style.YELLOW.value}
 
 BEFORE ASKING QUESTIONS IN THE SURFRANCH CHANNEL, PLEASE GIVE A BEST EFFORT
 TO FIX THE YAML ERRORS YOURSELF USING THIS LINTER
 
 >>>   http://www.yamllint.com/   <<<
 
-
 IF YOU KNOW NOTHING ABOUT THE YAML SYNTAX, WE RECOMMEND READING THIS TUTORIAL
 
->>>   https://gettaurus.org/docs/YAMLTutorial/   <<<
-"""
+>>>   https://gettaurus.org/docs/YAMLTutorial/   <<<"""
             )
             raise e
 
@@ -537,7 +571,7 @@ def handle_start_floodwaiterror(error):
     )
     if hasattr(error, "message"):
         message = message + f"\n{error.message}"
-    log(message)
+    log_red(message)
     traceback.print_exc()
 
 
