@@ -192,9 +192,9 @@ You will be prompted to enter your phone (or bot token) and the Telegram code yo
 - `macOS Catalina v10.15.7`
 - ```bash
   $ python --version
-  Python 3.7.5
+  Python 3.9.5
   $ pip --version
-  pip 19.2.3 from ... (python 3.7)
+  pip 21.1.1 from ... (python 3.9)
   ```
 - 5 unique Telegram channels
 - 5 unique messages
@@ -209,12 +209,10 @@ You will be prompted to enter your phone (or bot token) and the Telegram code yo
   - Rose simple button click: Can use simple telethon
   - Alphabet captchas: Can use some optical character recognition
   - Sum of integers or logical operations: OCR, identify operator and perform the logic
-- Add some `random` message getter from list of messages vs hard mapping
 - Add some rate limiting aspect. Not sure what the limit ...
   - Maybe if possible have 1 app connect and keep session and channel logged in state. Then the other
     that does the shilling which interacts with first. The first stays connected at all times to avoid the JoinChannelRequest flood.
 - Account rotation to not get banned or rate limited ...
-- Add unit tests
 - UI maybe if we want to get fancy with this
   - Or use existing tg clients with something like pyautogui
 
