@@ -186,6 +186,22 @@ class ValidateSettingsTest(unittest.TestCase):
         self.assertEqual(tg_shill_bot.resolve_total_messages(stop_chl1)["loop"], False)
         self.assertEqual(tg_shill_bot.resolve_total_messages(stop_chl2)["loop"], False)
 
+    def test_log_green(self):
+        self.assertIn(
+            tg_shill_bot.Style.GREEN.value, tg_shill_bot.log_green("i am green")
+        )
+
+    def test_log_yellow(self):
+        self.assertIn(
+            tg_shill_bot.Style.YELLOW.value, tg_shill_bot.log_yellow("i am yellow")
+        )
+
+    def test_log_red(self):
+        self.assertIn(tg_shill_bot.Style.RED.value, tg_shill_bot.log_red("i am red"))
+
+    def test_header(self):
+        self.assertIn(tg_shill_bot.Style.CYAN.value, tg_shill_bot.header())
+
 
 if __name__ == "__main__":
     unittest.main()
