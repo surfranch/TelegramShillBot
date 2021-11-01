@@ -19,6 +19,7 @@ You can ask us questions via Telegram: https://t.me/joinchat/Sp3ACd_CTKA0MWIx
 This can cause your account to be rate limited and even banned if you shill too often. A safe `wait_interval` is typically around 900 seconds.
 
 ## ToC
+* [Download](#download)
 * [Setup](#setup)
 * [Running](#running)
   + [Easy](#easy)
@@ -28,6 +29,31 @@ This can cause your account to be rate limited and even banned if you shill too 
 * [Tested With](#tested-with)
 * [Contribute](#contribute)
 * [ToDo](#todo)
+
+## Download
+- Download the code
+  - **DEVELOPER:** You can `git clone` the repo
+    ```bash
+    git clone git@github.com:surfranch/TelegramShillBot.git
+    ```
+  - **NON-DEVELOPER:** You can download the ZIP archive
+    - https://github.com/surfranch/TelegramShillBot/archive/refs/heads/main.zip
+    - Save it to a path you will be able to easily navigate to
+      - For example:
+        ```bash
+        # Mac
+        /Users/yourusername/shillbot
+
+        # Windows
+        C:\shillbot
+
+        # Linux
+        /opt/shillbot
+        ```
+- Open a `terminal` and navigate to the downloaded code
+  - For our non-developer friends, if you have no/little experience with a `terminal`, one of these video tutorials should help
+    - Mac: https://www.youtube.com/watch?v=aKRYQsKR46I
+    - Windows: https://www.youtube.com/watch?v=MBBWVgE0ewk
 
 ## Setup
 - Obtain a Telegram API ID
