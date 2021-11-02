@@ -15,12 +15,13 @@ import jsonschema
 import yaml
 from telethon import TelegramClient, functions
 from telethon.errors.rpcerrorlist import (
+    ChatWriteForbiddenError,
     FloodWaitError,
     SlowModeWaitError,
     MediaCaptionTooLongError,
 )
 
-VERSION = "v0.17"
+VERSION = "v0.18"
 
 
 class Style(Enum):
@@ -228,6 +229,15 @@ def handle_mediacaptiontoolongerror(channel):
     return channel
 
 
+async def handle_chatwriteforbiddenerror(channel):
+    one_hour = 60 * 60
+    log_red(
+        f"ChatWriteForbiddenError invoked while sending a message to {channel['name']};"
+        + f" Forcing a {one_hour} second wait interval for this channel"
+    )
+    await asyncio.sleep(one_hour)
+
+
 def handle_unknownerror(error):
     message = "Unknown error invoked while running bot; Abandoning all execution"
     if hasattr(error, "message"):
@@ -310,6 +320,8 @@ async def send_message(channel):
         channel = await dispatch_message(*next_message(channel))
     except FloodWaitError as fwe:
         await handle_message_floodwaiterror(fwe, channel)
+    except ChatWriteForbiddenError:
+        await handle_chatwriteforbiddenerror(channel)
     except SlowModeWaitError as smwe:
         channel = handle_slowmodewaiterror(smwe, channel)
     except MediaCaptionTooLongError:

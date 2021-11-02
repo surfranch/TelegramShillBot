@@ -1,3 +1,8 @@
+### v0.18
+##### 11/02/2021
+- add ability to handle ChatWriteForbiddenError exception
+  - instead of failing completely for the channel, will instead sleep for 1 hour
+
 ### v0.17
 ##### 10/29/2021
 - bug fix to ensure random thank yous are indeed random
