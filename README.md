@@ -187,6 +187,7 @@ This can cause your account to be rate limited and even banned if you shill too 
 - Install Docker
   - https://docs.docker.com/engine/install/
 #### From Your Terminal
+**NOTE:** Assumes you have navigated to the same directory as the downloaded code
 - Run the Docker bot script
   ```bash
   ./build_n_run.sh
@@ -194,6 +195,7 @@ This can cause your account to be rate limited and even banned if you shill too 
 
 ### Not As Easy
 #### From Your Terminal
+**NOTE:** Assumes you have navigated to the same directory as the downloaded code
 - Install Python packages
   ```bash
   python3 -m venv venv
