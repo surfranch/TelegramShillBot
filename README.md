@@ -188,9 +188,14 @@ This can cause your account to be rate limited and even banned if you shill too 
   - https://docs.docker.com/engine/install/
 #### From Your Terminal
 **NOTE:** Assumes you have navigated to the same directory as the downloaded code
-- Run the Docker bot script
+- **Linux/Mac users:** run the Docker bot script
   ```bash
   ./build_n_run.sh
+  ```
+- **Windows users:** run the Docker commands
+  ```bash
+  docker image build -t shil:latest .
+  docker container run -it --rm shil
   ```
 
 ### Not As Easy
