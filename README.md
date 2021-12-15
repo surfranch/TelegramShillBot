@@ -28,6 +28,7 @@ This can cause your account to be rate limited and even banned if you shill too 
 * [Stopping](#stopping)
 * [Tested With](#tested-with)
 * [Contribute](#contribute)
+* [FAQ](#faq)
 * [ToDo](#todo)
 
 ## Download
