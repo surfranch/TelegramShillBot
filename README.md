@@ -237,6 +237,29 @@ You will be prompted to enter your phone (or bot token) and the Telegram code yo
 - We welcome any contribution to the project (issues and PRs)
 - If you have any code to contribute, please follow the fork, branch, PR process
 
+## FAQ
+**- Does the bot still work ??**
+
+As of 12/15/2021, yes ..
+
+**- Can I use multiple accounts on a single bot ??**
+
+No .. But -- there is nothing stopping you from running multiple bots, each using a different account, on your machine ..
+
+**- Why are there random "thank yous" appended to every message ??**
+
+When you send identical messages, multiple times to multiple channels, Telegram will ban you .. In an effort to avoid this ban, we have decided to append random "thank yous" to every message sent, and it appears to work ..
+
+**- Why am I getting a FloodWaitError ??**
+
+This primarily occurs when: 1) you are attempting to connect to "many" channels, and 2) you are sending messages "frequently" .. We recommend starting with 10 channels and sending messages every 900 seconds .. Based on your results, you can increase/decrease from there ..
+
+**- Why am I getting banned ??**
+
+*User invoked ban ::* this is when a user has banned you from a channel, for whatever reason .. There is nothing we can do here ..
+
+*Telegram invoked ban ::* this is when Telegram has banned your account, most likely for sending identical messages, multiple times to multiple channels (see FAQ about random "thank yous" above) .. To unban, this [LINK](https://whatareview.com/how-to-fix-recover-telegram-this-phone-number-is-banned/) seems to work ..
+
 ## ToDo
 - Solve join captchas:
   - Rose simple button click: Can use simple telethon
