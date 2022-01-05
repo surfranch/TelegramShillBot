@@ -3,6 +3,11 @@
 - add ability to configure splay, with a default of 7 seconds
   - instead of trying to auto-calculate this based on the number of channels
   - more power to the user
+  ```yaml
+  ...
+  splay: 7
+  ...
+  ```
 
 ### v0.18
 ##### 11/02/2021
