@@ -23,7 +23,7 @@ format:
 	@. venv/bin/activate && black *.py
 
 lint:
-	@. venv/bin/activate && pylint *.py
+	@. venv/bin/activate && pylint tg_shill_bot.py
 
 test:
 	@. venv/bin/activate && python test_tg_shill_bot.py

@@ -7,6 +7,12 @@ phone_number: "PHONE_NUMBER"
 # this has to be in quotes to ensure it is treated as a string
 # e.g. phone_number: "+18888675309"
 
+splay: 7
+# configurable randomness of when channels connect and messages are sent;
+# we recommend increasing this number when connecting to many (10+)
+# channels to avoid the dreaded FloodWaitError; it is preferable to use
+# prime numbers for maximum randomness
+
 messages:
   one: |
     this is message 1
