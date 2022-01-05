@@ -1,7 +1,6 @@
 # stdlib
 import asyncio
 import functools
-import math
 import random
 import sys
 import traceback
@@ -21,7 +20,7 @@ from telethon.errors.rpcerrorlist import (
     MediaCaptionTooLongError,
 )
 
-VERSION = "v0.18"
+VERSION = "v0.19"
 
 
 class Style(Enum):
@@ -118,32 +117,19 @@ def channels_to_raid():
 
 
 @functools.lru_cache()
-def recommended_splay():
-    # all of this assumes TG rate limit is 20 API calls per 1 minute
-    segment_time = 72  # 120% of 60 seconds
-    max_channels_per_segment = 20  # max calls per segment
-    channels = len(channels_to_raid())
-    segments = math.ceil(channels / max_channels_per_segment)
-    total_segment_time = segments * segment_time
-    default_splay = math.ceil(segment_time / max_channels_per_segment)
-    calculated_splay = math.ceil(total_segment_time / channels)
-    return default_splay if calculated_splay > default_splay else calculated_splay
-
-
-@functools.lru_cache()
 def splay_map():
     count = 1
     result = {}
     for channel in channels_to_raid():
-        result[channel] = count * recommended_splay()
+        result[channel] = count * splay()
         count += 1
     return result
 
 
 @functools.lru_cache()
-def splay(channel):
-    channel_splay = splay_map()
-    return channel_splay[channel]
+def channel_splay(channel):
+    channel_splay_map = splay_map()
+    return channel_splay_map[channel]
 
 
 @asyncstdlib.lru_cache()
@@ -184,7 +170,7 @@ def channel_total_messages(channel):
 def channel_map(channel):
     return {
         "name": channel,
-        "splay": splay(channel),
+        "splay": channel_splay(channel),
         "wait_interval": channel_wait_interval(channel),
         "increase_wait_interval": channel_increase_wait_interval(channel),
         "message": channel_message(channel),
@@ -466,7 +452,7 @@ async def start():
     await asyncio.sleep(10)
 
     print("")
-    log_green(f"Calculated splay: {recommended_splay()} seconds")
+    log_green(f"Configured splay: {splay()} seconds")
     log_green(
         "Splay will be added to connection and user defined wait intervals"
         + " to avoid Telegram rate limiting"
@@ -483,6 +469,7 @@ def validate_account_settings(settings):
             "api_hash": {"type": "string"},
             "app_short_name": {"type": "string"},
             "phone_number": {"type": "string"},
+            "splay": {"type": "number"},
             "messages": {"type": "object"},
             "raid": {"type": "object"},
         },
@@ -492,6 +479,7 @@ def validate_account_settings(settings):
             "api_hash",
             "app_short_name",
             "phone_number",
+            "splay",
             "messages",
             "raid",
         ],
@@ -591,6 +579,11 @@ def handle_start_floodwaiterror(error):
         message = message + f"\n{error.message}"
     log_red(message)
     traceback.print_exc()
+
+
+def splay():
+    settings = load_settings()
+    return settings["splay"]
 
 
 def api_id():

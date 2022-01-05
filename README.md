@@ -77,6 +77,8 @@ This can cause your account to be rate limited and even banned if you shill too 
     api_hash: API_HASH
     app_short_name: APP_SHORT_NAME
     phone_number: "PHONE_NUMBER"
+
+    splay: 7
     ...
     ```
   - **AFTER**
@@ -88,6 +90,9 @@ This can cause your account to be rate limited and even banned if you shill too 
     app_short_name: MyAwesomeShillBot
     phone_number: "+18888675309"
     # ^^ make sure phone number is in quotes
+
+    splay: 7
+    # ^^ when connecting to many (10+) channels, this should be increased
     ...
     ```
 

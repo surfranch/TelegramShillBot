@@ -1,3 +1,9 @@
+### v0.19
+##### 01/05/2022
+- add ability to configure splay, with a default of 7 seconds
+  - instead of trying to auto-calculate this based on the number of channels
+  - more power to the user
+
 ### v0.18
 ##### 11/02/2021
 - add ability to handle ChatWriteForbiddenError exception
