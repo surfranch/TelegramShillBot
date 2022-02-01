@@ -515,26 +515,6 @@ def validate_messages_settings(settings):
         "additionalProperties": False,
         "minProperties": 1,
     }
-
-    # schema = {
-    #     "type": "object",
-    #     "patternProperties": {
-    #         "^.+$": {
-    #             "type": "object",
-    #             "properties": {
-    #                 "text": {"type": "string",
-    #                         "pattern": "^[a-zA-Z0-9_]+$"},
-    #                 "image": {"type": "string"},
-    #                 },
-    #             },
-    #             "additionalProperties": False,
-    #             "required": [
-    #                 "text",
-    #             ],
-    #     },
-    #     "additionalProperties": False,
-    #     "minProperties": 1,
-    # }
     jsonschema.validate(settings, schema)
 
 
