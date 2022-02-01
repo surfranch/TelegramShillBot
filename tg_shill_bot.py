@@ -1,5 +1,6 @@
 # stdlib
 import asyncio
+from email import message
 import functools
 import random
 import sys
@@ -257,21 +258,29 @@ def floodwaiterror_exists():
     return STATE.get("floodwaiterror_exists", False)
 
 
-def image_exists(channel):
+def image_exists(message):
     result = False
-    if channel["image"]:
-        path = Path(channel["image"])
+    if "image" in message and message["image"]:
+        path = Path(message["image"])
         if path.is_file():
             result = True
         else:
             log_yellow(
-                f">> Unable to locate {channel['name']}'s configured image {channel['image']};"
+                f">> Unable to locate {message['name']}'s configured image {message['image']};"
                 + " Sending message without image"
             )
     return result
 
 
+def thank_you_required(channel):
+    if "add_thank_you" in channel:
+        return channel["add_thank_you"]
+    return False
+
+
 def randomize_message(channel, ty1=None, ty2=None):
+    if not thank_you_required(channel):
+        return channel["message"][channel["last_message"]]
     if not ty1:
         ty1 = random_thank_you()
     if not ty2:
@@ -294,10 +303,10 @@ async def dispatch_message(message, channel):
     entity = await get_entity(channel["name"])
     channel = increment_count(channel)
     log_green(f"Sending message to {channel['name']} (#{channel['count']})")
-    if image_exists(channel):
-        await CLIENT.send_message(entity, message, file=channel["image"])
+    if image_exists(message):
+        await CLIENT.send_message(entity, message["text"], file=message["image"])
     else:
-        await CLIENT.send_message(entity, message)
+        await CLIENT.send_message(entity, message["text"])
     return channel
 
 
@@ -436,7 +445,8 @@ async def do_raid(channels):
 async def do_connect():
     tasks = [connect(channel_map(channel)) for channel in channels_to_raid()]
     channels = await asyncio.gather(*tasks)
-    connected_channels = filter(lambda channel: channel["is_connected"], channels)
+    connected_channels = filter(
+        lambda channel: channel["is_connected"], channels)
     return connected_channels
 
 
@@ -490,10 +500,42 @@ def validate_account_settings(settings):
 def validate_messages_settings(settings):
     schema = {
         "type": "object",
-        "patternProperties": {"^[a-zA-Z0-9_]+$": {"type": "string"}},
+        "patternProperties": {
+            "^.+$": {
+                "type": "object",
+                "properties": {
+                    "text": {"type": "string"},
+                    "image": {"type": "string"},
+                },
+                "additionalProperties": False,
+                "required": [
+                    "text",
+                ],
+            }
+        },
         "additionalProperties": False,
         "minProperties": 1,
     }
+
+    # schema = {
+    #     "type": "object",
+    #     "patternProperties": {
+    #         "^.+$": {
+    #             "type": "object",
+    #             "properties": {
+    #                 "text": {"type": "string",
+    #                         "pattern": "^[a-zA-Z0-9_]+$"},
+    #                 "image": {"type": "string"},
+    #                 },
+    #             },
+    #             "additionalProperties": False,
+    #             "required": [
+    #                 "text",
+    #             ],
+    #     },
+    #     "additionalProperties": False,
+    #     "minProperties": 1,
+    # }
     jsonschema.validate(settings, schema)
 
 
@@ -523,7 +565,7 @@ def validate_raid_settings(settings):
                     "wait_interval": {"type": "number", "exclusiveMinimum": 0},
                     "increase_wait_interval": {"type": "number", "exclusiveMinimum": 0},
                     "total_messages": {"type": "number", "exclusiveMinimum": 0},
-                    "image": {"type": "string"},
+                    "add_thank_you": {"type": "boolean"},
                 },
                 "additionalProperties": False,
                 "required": [
