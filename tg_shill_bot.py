@@ -1,6 +1,5 @@
 # stdlib
 import asyncio
-from email import message
 import functools
 import random
 import sys
