@@ -57,41 +57,14 @@ def log_red(message):
     return log_color(Style.RED.value, message)
 
 
-def thank_yous():
-    return [
-        "Cheers",
-        "Thank you",
-        "Thank you so much",
-        "Thanks",
-        "Thanks a bunch",
-        "Thanks a million",
-        "Ta",
-        "Tak",
-        "Dank u",
-        "Kiitos",
-        "Merci",
-        "Merci beaucoup",
-        "Danke",
-        "Danke schön",
-        "Danke vielmals",
-        "Mahalo",
-        "Grazie",
-        "Arigato",
-        "Obrigado",
-        "Gracias",
-        "Xie xie",
-        "Shukran",
-        "Hvala",
-        "Efharisto",
-        "Dhanyavaad",
-        "Spasiba",
-        "Salamat",
-        "Khob khun",
-    ]
+def random_messages():
+    settings = load_settings()
+    return settings["random_message"]
 
 
-def random_thank_you():
-    return thank_yous()[random.randrange(len(thank_yous()))]
+def random_message():
+    rms = random_messages()
+    return rms[random.randrange(len(rms))]
 
 
 def header():
@@ -271,12 +244,12 @@ def image_exists(channel):
     return result
 
 
-def randomize_message(channel, ty1=None, ty2=None):
-    if not ty1:
-        ty1 = random_thank_you()
-    if not ty2:
-        ty2 = random_thank_you()
-    return channel["message"][channel["last_message"]] + "\n" + ty1 + " & " + ty2 + "!"
+def randomize_message(channel, rm1=None, rm2=None):
+    if not rm1:
+        rm1 = random_message()
+    if not rm2:
+        rm2 = random_message()
+    return channel["message"][channel["last_message"]] + "\n" + rm1 + " & " + rm2 + "!"
 
 
 def next_message(channel):
@@ -472,6 +445,7 @@ def validate_account_settings(settings):
             "splay": {"type": "number"},
             "messages": {"type": "object"},
             "raid": {"type": "object"},
+            "random_message": {"type": "array"},
         },
         "additionalProperties": False,
         "required": [
@@ -482,7 +456,19 @@ def validate_account_settings(settings):
             "splay",
             "messages",
             "raid",
+            "random_message",
         ],
+    }
+    jsonschema.validate(settings, schema)
+
+
+def validate_random_message_settings(settings):
+    schema = {
+        "type": "array",
+        "minItems": 1,
+        "items": {
+            "type": "string",
+        },
     }
     jsonschema.validate(settings, schema)
 
@@ -610,7 +596,8 @@ if __name__ == "__main__":
     header()
     CLIENT = TelegramClient(app_short_name(), api_id(), api_hash())
     STATE = {}
-    LOOP = asyncio.get_event_loop()
+    LOOP = asyncio.new_event_loop()
+    asyncio.set_event_loop(LOOP)
     try:
         LOOP.run_until_complete(start())
         LOOP.run_until_complete(stop())
