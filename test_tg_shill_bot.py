@@ -20,6 +20,8 @@ class ValidateSettingsTest(unittest.TestCase):
             "splay": 7,
             "messages": {},
             "raid": {},
+            "random_message_format": 'lambda x : x + "!"',
+            "random_message": [],
         }
 
         # assert legit returns none
@@ -89,6 +91,43 @@ class ValidateSettingsTest(unittest.TestCase):
         with self.assertRaises(Exception):
             bad_raid.pop("raid")
             tg_shill_bot.validate_account_settings(bad_raid)
+
+        bad_random_message = account_settings.copy()
+        # assert bad random message raises exception
+        with self.assertRaises(Exception):
+            bad_random_message["random_message"] = {}
+            tg_shill_bot.validate_account_settings(bad_random_message)
+        with self.assertRaises(Exception):
+            bad_random_message.pop("random_message")
+            tg_shill_bot.validate_account_settings(bad_random_message)
+
+        bad_random_message_format = account_settings.copy()
+        # assert bad random message format raises exception
+        with self.assertRaises(Exception):
+            bad_random_message_format["random_message_format"] = {}
+            tg_shill_bot.validate_account_settings(bad_random_message_format)
+        with self.assertRaises(Exception):
+            bad_random_message_format.pop("random_message_format")
+            tg_shill_bot.validate_account_settings(bad_random_message_format)
+
+    def test_validate_random_message_settings(self):
+        random_message_settings = [
+            "hello",
+            "world",
+        ]
+
+        # assert legit returns none
+        self.assertIsNone(
+            tg_shill_bot.validate_random_message_settings(random_message_settings)
+        )
+
+        # assert empty random message raises exception
+        with self.assertRaises(Exception):
+            tg_shill_bot.validate_random_message_settings([])
+
+        # assert random message with nums raises exception
+        with self.assertRaises(Exception):
+            tg_shill_bot.validate_random_message_settings([1])
 
     def test_validate_messages_settings(self):
         messages_settings = {
@@ -176,10 +215,10 @@ class ValidateSettingsTest(unittest.TestCase):
         self.assertIn(ty1, message)
         self.assertIn(ty2, message)
 
-    def test_random_thank_you(self):
-        ty = tg_shill_bot.random_thank_you()
+    def test_random_message(self):
+        rm = tg_shill_bot.random_message()
 
-        self.assertIn(ty, tg_shill_bot.thank_yous())
+        self.assertIn(rm, tg_shill_bot.random_messages())
 
     def test_next_message(self):
         start = 0

@@ -43,3 +43,47 @@ raid:
     total_messages: 10
     # this assumes the image's path is relative to the script `tg_shill_bot.py`
     image: images/cd.jpg
+
+########################################################
+### !! DANGER ZONE !!
+### >> only config below if you know what you are doing
+########################################################
+# this is a Python lambda function -- it is used to construct a formatted message that
+# takes 2 inputs (random message 1 & random message 2) and returns a single string that
+# is appened to your primary message
+# this lambda will be eval'ed during runtime, so please becareful and know what you are doing
+# before modifying
+random_message_format: |
+  lambda rm1, rm2 : rm1 + " & " + rm2 + "!"
+
+# this is a list of random "thank yous" that will be used to create a random message
+# that will be appended to your primary message to avoid TG banning -- SEE FAQs
+random_message:
+- Cheers
+- Thank you
+- Thank you so much
+- Thanks
+- Thanks a bunch
+- Thanks a million
+- Ta
+- Tak
+- Dank u
+- Kiitos
+- Merci
+- Merci beaucoup
+- Danke
+- Danke schön
+- Danke vielmals
+- Mahalo
+- Grazie
+- Arigato
+- Obrigado
+- Gracias
+- Xie xie
+- Shukran
+- Hvala
+- Efharisto
+- Dhanyavaad
+- Spasiba
+- Salamat
+- Khob khun

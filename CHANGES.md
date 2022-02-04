@@ -1,3 +1,21 @@
+### v0.20
+##### 02/04/2022
+- add ability to manage the "random thank yous" via the config file vs in the code
+  - is now a long list in the `settings.example.yml` file
+  - this is a breaking change, you will need to update your local config and code to get this to work
+  - more power to the user -- but becareful !!
+  ```yaml
+  ...
+  random_message_format: |
+    lambda rm1, rm2 : rm1 + " & " + rm2 + "!"
+
+  random_message:
+  - Cheers
+  - Thank you
+  - Thank you so much
+  ...
+  ```
+
 ### v0.19
 ##### 01/05/2022
 - add ability to configure splay, with a default of 7 seconds
