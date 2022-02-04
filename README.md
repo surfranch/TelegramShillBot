@@ -256,6 +256,8 @@ No .. But -- there is nothing stopping you from running multiple bots, each usin
 
 When you send identical messages, multiple times to multiple channels, Telegram will ban you .. In an effort to avoid this ban, we have decided to append random "thank yous" to every message sent, and it appears to work ..
 
+*NOTE:* you have the ability to modify the words used to generate the random message, and its presented format, via the `settings.yml` file .. We recommend only the most skilled users even attempt this ..
+
 **- Why am I getting a FloodWaitError ??**
 
 This primarily occurs when: 1) you are attempting to connect to "many" channels, and 2) you are sending messages "frequently" .. We recommend starting with 10 channels and sending messages every 900 seconds .. Based on your results, you can increase/decrease from there ..

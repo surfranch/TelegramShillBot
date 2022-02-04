@@ -20,7 +20,7 @@ from telethon.errors.rpcerrorlist import (
     MediaCaptionTooLongError,
 )
 
-VERSION = "v0.19"
+VERSION = "v0.20"
 
 
 class Style(Enum):
@@ -65,6 +65,13 @@ def random_messages():
 def random_message():
     rms = random_messages()
     return rms[random.randrange(len(rms))]
+
+
+def format_random_message(rm1, rm2):
+    settings = load_settings()
+    tmp_rmf = settings["random_message_format"]
+    rmf = eval(tmp_rmf.strip())
+    return rmf(rm1, rm2)
 
 
 def header():
@@ -249,7 +256,8 @@ def randomize_message(channel, rm1=None, rm2=None):
         rm1 = random_message()
     if not rm2:
         rm2 = random_message()
-    return channel["message"][channel["last_message"]] + "\n" + rm1 + " & " + rm2 + "!"
+    rm = format_random_message(rm1, rm2)
+    return channel["message"][channel["last_message"]] + "\n" + rm
 
 
 def next_message(channel):
@@ -445,6 +453,7 @@ def validate_account_settings(settings):
             "splay": {"type": "number"},
             "messages": {"type": "object"},
             "raid": {"type": "object"},
+            "random_message_format": {"type": "string"},
             "random_message": {"type": "array"},
         },
         "additionalProperties": False,
@@ -456,6 +465,7 @@ def validate_account_settings(settings):
             "splay",
             "messages",
             "raid",
+            "random_message_format",
             "random_message",
         ],
     }

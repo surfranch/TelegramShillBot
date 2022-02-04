@@ -20,6 +20,7 @@ class ValidateSettingsTest(unittest.TestCase):
             "splay": 7,
             "messages": {},
             "raid": {},
+            "random_message_format": 'lambda x : x + "!"',
             "random_message": [],
         }
 
@@ -99,6 +100,15 @@ class ValidateSettingsTest(unittest.TestCase):
         with self.assertRaises(Exception):
             bad_random_message.pop("random_message")
             tg_shill_bot.validate_account_settings(bad_random_message)
+
+        bad_random_message_format = account_settings.copy()
+        # assert bad random message format raises exception
+        with self.assertRaises(Exception):
+            bad_random_message_format["random_message_format"] = {}
+            tg_shill_bot.validate_account_settings(bad_random_message_format)
+        with self.assertRaises(Exception):
+            bad_random_message_format.pop("random_message_format")
+            tg_shill_bot.validate_account_settings(bad_random_message_format)
 
     def test_validate_random_message_settings(self):
         random_message_settings = [
