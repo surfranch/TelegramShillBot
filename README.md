@@ -228,12 +228,12 @@ You will be prompted to enter your phone (or bot token) and the Telegram code yo
 - Whether running in Docker or locally, `Ctrl+C` should stop the process
 
 ## Tested With
-- `macOS Catalina v10.15.7`
+- `macOS Monterey v12.1`
 - ```bash
   $ python --version
-  Python 3.9.5
+  Python 3.10.0
   $ pip --version
-  pip 21.1.1 from ... (python 3.9)
+  pip 21.2.3 from ... (python 3.10)
   ```
 - 5 unique Telegram channels
 - 5 unique messages

@@ -20,7 +20,7 @@ from telethon.errors.rpcerrorlist import (
     MediaCaptionTooLongError,
 )
 
-VERSION = "v0.20"
+VERSION = "v0.21"
 
 
 class Style(Enum):

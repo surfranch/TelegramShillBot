@@ -1,3 +1,10 @@
+### v0.21
+##### 02/13/2022
+- fixed bug in dockerfile -- updated python version to 3.10
+  - it was using python version 3.9, but changes to how the event loop is created/managed in bot v0.20 is not compatible with 3.9
+  - just updated dockerfile to use `FROM python:3.10-alpine`
+  - forgot to test dockerfile in bot v0.20 -- ran tests using local setup only
+
 ### v0.20
 ##### 02/04/2022
 - add ability to manage the "random thank yous" via the config file vs in the code
