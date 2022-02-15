@@ -1,3 +1,31 @@
+### v0.22
+##### 02/15/2022
+- added `-n` and `-h` options in the `build_n_run.sh` script
+  - new options are not mandatory
+  - if no options are chosen, then the default name for the image and container will be `shillbot`
+  - this will allow you to run multiple bots via docker, if you so choose
+  - you can now get some help
+  ```bash
+  ./build_n_run.sh -h
+
+  Usage:
+    build_n_run.sh [OPTIONS]
+
+  Options:
+    -n STRING     Name the image and running container
+    -h            Show help message
+  ```
+  - and choose to name the image you will build and the container you will run
+  ```bash
+  ./build_n_run.sh -n bot1
+  ...
+  => exporting to image  0.0s
+  => => exporting layers  0.0s
+  => => writing image sha256:abc123  0.0s
+  => => naming to docker.io/library/bot1:latest
+  ...
+  ```
+
 ### v0.21
 ##### 02/13/2022
 - fixed bug in dockerfile -- updated python version to 3.10
