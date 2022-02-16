@@ -618,6 +618,14 @@ def main():
         LOOP.run_until_complete(stop())
 
 
+def raise_startup_exception():
+    raise Exception(
+        "!! WRONG VERSION OF PYTHON !! "
+        + "READ THE INSTRUCTIONS :: "
+        + "https://github.com/surfranch/TelegramShillBot/blob/main/README.md"
+    )
+
+
 if __name__ == "__main__":
     header()
     CLIENT = TelegramClient(app_short_name(), api_id(), api_hash())
@@ -626,12 +634,10 @@ if __name__ == "__main__":
         if sys.version_info.minor >= 10:
             LOOP = asyncio.new_event_loop()
             asyncio.set_event_loop(LOOP)
-        else:
+        elif sys.version_info.minor >= 5:
             LOOP = asyncio.get_event_loop()
+        else:
+            raise_startup_exception()
     else:
-        raise Exception(
-            "!! WRONG VERSION OF PYTHON !! "
-            + "READ THE INSTRUCTIONS :: "
-            + "https://github.com/surfranch/TelegramShillBot/blob/main/README.md"
-        )
+        raise_startup_exception()
     main()
