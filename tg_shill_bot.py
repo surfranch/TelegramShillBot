@@ -20,7 +20,7 @@ from telethon.errors.rpcerrorlist import (
     MediaCaptionTooLongError,
 )
 
-VERSION = "v0.22"
+VERSION = "v0.23"
 
 
 class Style(Enum):
@@ -563,6 +563,7 @@ IF YOU KNOW NOTHING ABOUT THE YAML SYNTAX, WE RECOMMEND READING THIS TUTORIAL
         validate_account_settings(settings)
         validate_messages_settings(settings["messages"])
         validate_raid_settings(settings["raid"])
+        validate_random_message_settings(settings["random_message"])
     return settings
 
 
