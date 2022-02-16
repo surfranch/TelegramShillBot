@@ -603,12 +603,7 @@ def phone_number():
     return settings["phone_number"]
 
 
-if __name__ == "__main__":
-    header()
-    CLIENT = TelegramClient(app_short_name(), api_id(), api_hash())
-    STATE = {}
-    LOOP = asyncio.new_event_loop()
-    asyncio.set_event_loop(LOOP)
+def main():
     try:
         LOOP.run_until_complete(start())
         LOOP.run_until_complete(stop())
@@ -621,3 +616,22 @@ if __name__ == "__main__":
     except Exception as start_error:
         handle_unknownerror(start_error)
         LOOP.run_until_complete(stop())
+
+
+if __name__ == "__main__":
+    header()
+    CLIENT = TelegramClient(app_short_name(), api_id(), api_hash())
+    STATE = {}
+    if sys.version_info.major == 3:
+        if sys.version_info.minor >= 10:
+            LOOP = asyncio.new_event_loop()
+            asyncio.set_event_loop(LOOP)
+        else:
+            LOOP = asyncio.get_event_loop()
+    else:
+        raise Exception(
+            "!! WRONG VERSION OF PYTHON !! "
+            + "READ THE INSTRUCTIONS :: "
+            + "https://github.com/surfranch/TelegramShillBot/blob/main/README.md"
+        )
+    main()

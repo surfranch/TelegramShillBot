@@ -142,3 +142,4 @@ settings.yml
 *.session
 *.session-journal
 .vscode
+.python-version
