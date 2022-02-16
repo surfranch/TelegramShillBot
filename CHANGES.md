@@ -1,3 +1,7 @@
+### v0.23
+##### 02/??/2022
+- fixed bug - forgot to validate random message settings on startup
+
 ### v0.22
 ##### 02/15/2022
 - added `-n` and `-h` options in the `build_n_run.sh` script
