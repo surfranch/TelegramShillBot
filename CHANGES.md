@@ -1,3 +1,8 @@
+### v0.23
+##### 02/17/2022
+- fixed bug - forgot to validate random message settings on startup
+- added code to allow those running a python version older than 3.10 (3.5 - 3.9) to NOT have to upgrade to 3.10 to get bot to work
+
 ### v0.22
 ##### 02/15/2022
 - added `-n` and `-h` options in the `build_n_run.sh` script
