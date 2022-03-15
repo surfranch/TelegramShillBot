@@ -64,7 +64,7 @@ This can cause your account to be rate limited and even banned if you shill too 
   - https://my.telegram.org/apps
   ![telegram app config](./docs/appconfig.png)
 
-- Create a copy of `settings.example.yml` and name it `settings.yml`
+- Create a copy of the file `settings.example.yml` in the same directory and name it `settings.yml`
 
 - If this is your 1st time editing a YAML file, we strongly recommend taking 15 minutes to learn about it here: https://gettaurus.org/docs/YAMLTutorial/
 
@@ -182,7 +182,7 @@ This can cause your account to be rate limited and even banned if you shill too 
         # ^^ you can choose to limit how many messages are sent to a channel
     ```
 
-- Verify your YAML by copying all of `settings.yml` and paste it into http://www.yamllint.com/
+- Verify your YAML by copying the contents of `settings.yml` and paste it into http://www.yamllint.com/
   - Fix any reported errors
 
 - Sign into the Telegram channels you plan to shill, using the account you plan to shill with
@@ -205,17 +205,27 @@ This can cause your account to be rate limited and even banned if you shill too 
   ```
 
 ### Not As Easy
+- Install Python v3
+  - v3.10 is the preferred (tested) version
+  - v3.5 - v3.9 *should* work
+  - **MAC:** https://docs.python-guide.org/starting/install3/osx/
+  - **WINDOWS:** https://phoenixnap.com/kb/how-to-install-python-3-windows
+  - **LINUX:** https://docs.python-guide.org/starting/install3/linux/
+- Verify your Python version is v3.5 or greater
+  ```bash
+  python3 --version
+  Python 3.10.0
+  ```
+
 #### From Your Terminal
 **NOTE:** Assumes you have navigated to the same directory as the downloaded code
 - Install Python packages
   ```bash
-  python3 -m venv venv
-  source venv/bin/activate
-  pip install -r requirements.txt
+  pip3 install -r requirements.txt
   ```
 - Run the bot
   - ```bash
-    python tg_shill_bot.py
+    python3 tg_shill_bot.py
     ```
 
 ### Telegram Prompt
@@ -246,7 +256,7 @@ You will be prompted to enter your phone (or bot token) and the Telegram code yo
 ## FAQ
 **- Does the bot still work ??**
 
-As of 12/15/2021, yes ..
+As of 3/15/2022, yes !! We know of people running it on Mac, Windows, and Linux ..
 
 **- Can I use multiple accounts on a single bot ??**
 
@@ -273,9 +283,6 @@ This primarily occurs when: 1) you are attempting to connect to "many" channels,
   - Rose simple button click: Can use simple telethon
   - Alphabet captchas: Can use some optical character recognition
   - Sum of integers or logical operations: OCR, identify operator and perform the logic
-- Add some rate limiting aspect. Not sure what the limit ...
-  - Maybe if possible have 1 app connect and keep session and channel logged in state. Then the other
-    that does the shilling which interacts with first. The first stays connected at all times to avoid the JoinChannelRequest flood.
 - Account rotation to not get banned or rate limited ...
 - UI maybe if we want to get fancy with this
   - Or use existing tg clients with something like pyautogui
