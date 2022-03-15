@@ -208,9 +208,9 @@ This can cause your account to be rate limited and even banned if you shill too 
 - Install Python v3
   - v3.10 is the preferred (tested) version
   - v3.5 - v3.9 *should* work
-  - **MAC:** https://docs.python-guide.org/starting/install3/osx/
-  - **WINDOWS:** https://phoenixnap.com/kb/how-to-install-python-3-windows
-  - **LINUX:** https://docs.python-guide.org/starting/install3/linux/
+  - **Mac:** https://docs.python-guide.org/starting/install3/osx/
+  - **Windows:** https://phoenixnap.com/kb/how-to-install-python-3-windows
+  - **Linux:** https://docs.python-guide.org/starting/install3/linux/
 - Verify your Python version is v3.5 or greater
   ```bash
   python3 --version
