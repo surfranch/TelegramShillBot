@@ -52,6 +52,17 @@ This can cause your account to be rate limited and even banned if you shill too 
         /opt/shillbot
         ```
 - Open a `terminal` and navigate to the downloaded code
+  - For example:
+    ```bash
+    # Mac
+    cd /Users/yourusername/shillbot
+
+    # Windows
+    cd C:\shillbot
+
+    # Linux
+    cd /opt/shillbot
+    ```
   - For our non-developer friends, if you have no/little experience with a `terminal`, one of these video tutorials should help
     - Mac: https://www.youtube.com/watch?v=aKRYQsKR46I
     - Windows: https://www.youtube.com/watch?v=MBBWVgE0ewk
