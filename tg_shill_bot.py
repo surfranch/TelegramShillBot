@@ -20,7 +20,7 @@ from telethon.errors.rpcerrorlist import (
     MediaCaptionTooLongError,
 )
 
-VERSION = "v0.23"
+VERSION = "v0.24"
 
 
 class Style(Enum):
@@ -85,7 +85,6 @@ def header():
 ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 ━━ {VERSION} ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-Visit: https://t.me/joinchat/Sp3ACd_CTKA0MWIx{Style.RESET.value}
 """
     print(surfranch)
     return surfranch

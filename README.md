@@ -9,12 +9,6 @@ There are a couple of runtime options available (one easy, one hard), so please 
 If you find this bot useful, please consider donating any token of value to our BSC wallet:
 `0xb973B103c83E467f27D04e9F31F70aaf1A83d595`. Just as an example, some paid shill bots cost **~$500.00**, with few additional features.
 
-Our goal is simple: to earn enough money to build a [surf ranch](https://www.flowrider.com/product/flowbarrel-ten/) business.
-
-This project is free to everyone (except those wankers), and expect more kick ass projects soon!
-
-You can ask us questions via Telegram: https://t.me/joinchat/Sp3ACd_CTKA0MWIx
-
 ## <span style="color:red">WARNING</span> ##
 This can cause your account to be rate limited and even banned if you shill too often. A safe `wait_interval` is typically around 900 seconds.
 
